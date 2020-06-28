@@ -31,50 +31,50 @@ uses
   Windows, SysUtils, Classes, Contnrs, SyncObjs, DateUtils, StrUtils, Math;
 
 type
-  { TPerformance предназначена для точного замера времени,
-    прошедшего после начала измерений.
-    Внимание! Измерения в микросекундах
-    выполняются с погрешностью в несколько микросекунд (несмотря на
-    использование переменной PerformanceIgnoredTicks }
+  { TPerformance is designed to accurately measure time,
+     passed after the start of measurement.
+     Attention! Microsecond measurements
+     performed with an error of several microseconds (despite
+     using the variable PerformanceIgnoredTicks }
   TPerformance = record
   private
     FStartCounter: Int64;
     FIsRunning: Boolean;
     FElapsedTicks: Int64;
   public
-    // Начинает замер.
+    // Starts measuring
     procedure Start;
 
-    // Завершает замер. Обновляет поле FElapsedTicks. После того, как вызван
-    // метод Stop, методы ElapsedXXX будут возвращать запомненное в FElapsedTicks значение
+    // Finishes measuring. Updates the FElapsedTicks field. After the Stop method
+    // is called, the ElapsedXXX methods will return the value stored in FElapsedTicks
     procedure Stop;
 
-    // Возвращает кол-во миллисекунд после начала замеров
+    // Returns the number of milliseconds after the start of measurement
     function ElapsedMilliseconds(AStartNew: Boolean = False): Int64;
 
-    // Возвращает кол-во микросекунд после начала замеров
+    // Returns the number of microseconds after the start of measurements
     function ElapsedMicroseconds(AStartNew: Boolean = False): Int64;
 
-    // Возвращает кол-во секунд после начала замеров
+    // Returns the number of seconds after the start of measurement
     function ElapsedSeconds(AStartNew: Boolean = False): Double;
 
-    // Возвращает количество тиков с начала замеров
+    // Returns the number of ticks from the beginning of measurements
     function ElapsedTicks(AStartNew: Boolean = False): Int64;
 
-    // Возвращает время (TDateTime), прошедшее с начала замеров
+    // Returns the time (TDateTime) elapsed since the start of measurement
     function ElapsedTime(AStartNew: Boolean = False): TDateTime;
 
-    // Возвращает True, если измерения запущены
+    // Returns True if measurements are running.
     property IsRunning: Boolean read FIsRunning;
   end;
 
   TPerformanceEvent = record
-    // Дата/время начала и окончания события (по стандартному системному таймеру)
+    // Date / time of the beginning and end of the event (according to the standard system timer)
     BegDateTime: TDateTime;
     EndDateTime: TDateTime;
-    EventName: string;   // Наименование события
-    BegCounter: Int64;   // Значение счётчика в начале события
-    EndCounter: Int64;   // Значение счётчика в конце события
+    EventName: string;   // Event name
+    BegCounter: Int64;   // Counter value at the beginning of the event
+    EndCounter: Int64;   // Counter value at the end of the event
 
     function ElapsedTicks: Int64;
     function ElapsedMilliseconds: Int64;
@@ -88,26 +88,25 @@ type
     eoWriteBegTime, eoWriteEndTime, eoUseMicroSec, eoWriteFromStart);
   TGetPerformanceEventsOptions = set of TGetPerformanceEventsOption;
 
-  {Структура-запись для протоколирования длительности событий}
+  // TPerformanceEvents - record for event duration logging
   TPerformanceEvents = record
     Events: array of TPerformanceEvent;
 
-    // Запускает измерение нового события
+    // Starts measurement of a new event.
     procedure StartEvent(EventName: string);
 
-    // Останавливает измерение события. EventName Вы можете указывать
-    // только для наглядности.
+    //Stops event measurement. You can indicate EventName for
+    // illustration purposes only.
     procedure StopEvent(EventName: string = '');
 
-    // Возвращает информацию об измерении длительности событий
+    // Returns event duration measurement information
     function GetEventsAsString(EvOp: TGetPerformanceEventsOptions): string;
   end;
 
 var
   PerformanceFrequency: Int64;
 
-  // Количество тиков, которые нужно игнорировать для более точного
-  // измерения временных интервалов
+  // The number of ticks that must be ignored to more accurately measure time intervals
   PerformanceIgnoredTicks: Int64;
 
 implementation
@@ -135,13 +134,13 @@ var
   ACounter: Int64;
 begin
   if FIsRunning then
-  begin // Если измерения запущены, то возвращаем текущее значение
+  begin // If measurements are started, then return the current value
     QueryPerformanceCounter(ACounter);
     Result := ACounter - FStartCounter - PerformanceIgnoredTicks;
     if Result < 0 then
       Result := 0;
   end else
-  begin // Измерения остановлены - возвращаем значение на момент останова
+  begin // Measurements stopped - return the value at the time of stop
     Result := FElapsedTicks
   end;
 
@@ -158,7 +157,7 @@ procedure TPerformance.Start;
 begin
   FIsRunning    := True;
   FElapsedTicks := 0;
-  // Запрашиваем счётчик в самом конце метода
+  // Request a counter at the very end of the method
   QueryPerformanceCounter(FStartCounter);
 end;
 
@@ -166,7 +165,7 @@ procedure TPerformance.Stop;
 var
   ACounter: Int64;
 begin
-  // Запрашиваем счётчик в самом начале метода
+  // Request a counter at the very beginning of the method
   QueryPerformanceCounter(ACounter);
   FIsRunning := False;
   FElapsedTicks := ACounter - FStartCounter - PerformanceIgnoredTicks;
@@ -312,14 +311,14 @@ begin
   QueryPerformanceCounter(p1);
   QueryPerformanceCounter(p2);
   PerformanceIgnoredTicks := p2 - p1;
-  // Если Вам не требуется корректировка, то достаточно присвоить:
+  // If you do not need adjustment, then just assign:
   // PerformanceIgnoredTicks := 0
 end;
 
 initialization
-  // Получаем частоту высокочастотного таймера
+  // We get the frequency of the high-frequency timer
   QueryPerformanceFrequency(PerformanceFrequency);
   if PerformanceFrequency = 0 then
-    PerformanceFrequency := 1; // Чтобы не было ошибки деления на ноль
+    PerformanceFrequency := 1; // To avoid division by zero
   CalcIgnoredPerformanceTicks;
 end.
