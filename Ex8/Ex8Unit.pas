@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, MTUtils, ComCtrls, ExtCtrls, SyncObjs;
+  Dialogs, StdCtrls, MTUtils, ComCtrls, ExtCtrls, SyncObjs, TimeIntervals;
 
 type
   TMyThread = class(TThread)
