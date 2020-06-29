@@ -201,7 +201,7 @@ begin
     FElapsedTicks := 0;
 end;
 
-{ TPerformanceEvent }
+{ TTimeIntervalEvent }
 
 function TTimeIntervalEvent.ElapsedMilliseconds: Int64;
 begin
@@ -245,7 +245,7 @@ begin
   EndDateTime := Now;
 end;
 
-{ TPerformanceEvents }
+{ TTimeIntervalEvents }
 
 function TTimeIntervalEvents.GetEventsAsString(
   EvOp: TTimeIntervalGetEventsOptions): string;
