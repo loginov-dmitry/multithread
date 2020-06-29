@@ -101,7 +101,7 @@ end; }
 // Реализация, основанная на TPerformance
 procedure ThreadWaitTimeout(AThread: TThread; ATimeout: Integer);
 var
-  p: TPerformance;
+  p: TTimeInterval;
   T: TThreadAccessTerminated;
 begin
   // Получаем доступ к protected-свойству Terminated

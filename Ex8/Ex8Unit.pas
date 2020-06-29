@@ -77,7 +77,7 @@ end;
 
 procedure TForm1.Button1Click(Sender: TObject);
 var
-  p: TPerformanceEvents;
+  p: TTimeIntervalEvents;
   //p1, p2: Int64;
 begin
   {QueryPerformanceCounter(p1);
@@ -86,20 +86,20 @@ begin
   p.StartEvent('Этап 1');
   //Sleep(1);
   p.StopEvent();
-  p.StartEvent('Этап 1');
+  p.StartEvent('Этап 2');
   Sleep(20);
   p.StopEvent();
-  p.StartEvent('Этап 2');
+  p.StartEvent('Этап 3');
   Sleep(30);
   p.StopEvent('Этап 3');
-  {ShowMessage(p.GetEventsAsString([eoWriteStartTime, eoWriteAllTime,
-    eoUseMicroSec, eoWriteFromStart, eoWriteBegTime, eoWriteEndTime]));}
-  ShowMessage(p.GetEventsAsString([eoUseMicroSec]));
+  ShowMessage(p.GetEventsAsString([eoWriteStartTime, eoWriteAllTime,
+    eoUseMicroSec, eoWriteFromStart, eoWriteBegTime, eoWriteEndTime, eoWriteDate]));
+  //ShowMessage(p.GetEventsAsString([eoUseMicroSec]));
 end;
 
 procedure TForm1.Button2Click(Sender: TObject);
 var
-  p: TPerformance;
+  p: TTimeInterval;
 begin
   p.Start;
   Sleep(100);

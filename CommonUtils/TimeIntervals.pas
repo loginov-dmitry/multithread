@@ -28,15 +28,15 @@ unit TimeIntervals;
 interface
 
 uses
-  Windows, SysUtils, Classes, Contnrs, SyncObjs, DateUtils, StrUtils, Math;
+  Windows, SysUtils, Classes, DateUtils, StrUtils;
 
 type
-  { TPerformance is designed to accurately measure time,
+  { TTimeInterval is designed to accurately measure time,
      passed after the start of measurement.
      Attention! Microsecond measurements
      performed with an error of several microseconds (despite
      using the variable PerformanceIgnoredTicks }
-  TPerformance = record
+  TTimeInterval = record
   private
     FStartCounter: Int64;
     FIsRunning: Boolean;
@@ -68,7 +68,7 @@ type
     property IsRunning: Boolean read FIsRunning;
   end;
 
-  TPerformanceEvent = record
+  TTimeIntervalEvent = record
     // Date / time of the beginning and end of the event (according to the standard system timer)
     BegDateTime: TDateTime;
     EndDateTime: TDateTime;
@@ -84,58 +84,79 @@ type
     procedure Stop;
   end;
 
-  TGetPerformanceEventsOption = (eoWriteStartTime, eoWriteStopTime, eoWriteAllTime,
-    eoWriteBegTime, eoWriteEndTime, eoUseMicroSec, eoWriteFromStart);
-  TGetPerformanceEventsOptions = set of TGetPerformanceEventsOption;
+  TTimeIntervalGetEventsOption = (eoWriteStartTime, eoWriteStopTime, eoWriteAllTime,
+    eoWriteBegTime, eoWriteEndTime, eoUseMicroSec, eoWriteFromStart, eoWriteDate);
+  TTimeIntervalGetEventsOptions = set of TTimeIntervalGetEventsOption;
 
-  // TPerformanceEvents - record for event duration logging
-  TPerformanceEvents = record
-    Events: array of TPerformanceEvent;
+  // TTimeIntervalEvents - record for event duration logging
+  TTimeIntervalEvents = record
+    Events: array of TTimeIntervalEvent;
 
     // Starts measurement of a new event.
     procedure StartEvent(EventName: string);
 
-    //Stops event measurement. You can indicate EventName for
+    // Stops event measurement. You can indicate EventName for
     // illustration purposes only.
     procedure StopEvent(EventName: string = '');
 
     // Returns event duration measurement information
-    function GetEventsAsString(EvOp: TGetPerformanceEventsOptions): string;
+    function GetEventsAsString(EvOp: TTimeIntervalGetEventsOptions): string;
   end;
 
 var
   PerformanceFrequency: Int64;
+  UsePerformanceCounter: Boolean;
 
   // The number of ticks that must be ignored to more accurately measure time intervals
-  PerformanceIgnoredTicks: Int64;
+  PerformanceIgnoredTicks: Int64 = 0;
 
 implementation
 
+var
+  GetTickCount64Ref: function: UInt64;
+  GetTickCount64NotSupported: Boolean;
+function InternalGetTickCount64: UInt64;
+begin
+  if (@GetTickCount64Ref = nil) and (not GetTickCount64NotSupported) then // Функция не реализована в WinXP
+  begin
+    @GetTickCount64Ref := GetProcAddress(GetModuleHandle('kernel32.dll'), 'GetTickCount64');
+    if @GetTickCount64Ref = nil then
+      GetTickCount64NotSupported := True;
+  end;
 
-{ TPerformance }
+  if Assigned(GetTickCount64Ref) then
+    Result := GetTickCount64Ref
+  else
+    Result := GetTickCount;
+end;
 
-function TPerformance.ElapsedMicroseconds(AStartNew: Boolean = False): Int64;
+{ TTimeInterval }
+
+function TTimeInterval.ElapsedMicroseconds(AStartNew: Boolean = False): Int64;
 begin
   Result := Round(ElapsedSeconds(AStartNew) * 1000000);
 end;
 
-function TPerformance.ElapsedMilliseconds(AStartNew: Boolean = False): Int64;
+function TTimeInterval.ElapsedMilliseconds(AStartNew: Boolean = False): Int64;
 begin
   Result := Round(ElapsedSeconds(AStartNew) * 1000);
 end;
 
-function TPerformance.ElapsedSeconds(AStartNew: Boolean = False): Double;
+function TTimeInterval.ElapsedSeconds(AStartNew: Boolean = False): Double;
 begin
   Result := ElapsedTicks(AStartNew) / PerformanceFrequency;
 end;
 
-function TPerformance.ElapsedTicks(AStartNew: Boolean = False): Int64;
+function TTimeInterval.ElapsedTicks(AStartNew: Boolean = False): Int64;
 var
   ACounter: Int64;
 begin
   if FIsRunning then
   begin // If measurements are started, then return the current value
-    QueryPerformanceCounter(ACounter);
+    if UsePerformanceCounter then
+      QueryPerformanceCounter(ACounter)
+    else
+      ACounter := InternalGetTickCount64;
     Result := ACounter - FStartCounter - PerformanceIgnoredTicks;
     if Result < 0 then
       Result := 0;
@@ -148,25 +169,32 @@ begin
     Start;
 end;
 
-function TPerformance.ElapsedTime(AStartNew: Boolean): TDateTime;
+function TTimeInterval.ElapsedTime(AStartNew: Boolean): TDateTime;
 begin
   Result := IncMilliSecond(0, ElapsedMilliseconds(AStartNew));
 end;
 
-procedure TPerformance.Start;
+procedure TTimeInterval.Start;
 begin
   FIsRunning    := True;
   FElapsedTicks := 0;
   // Request a counter at the very end of the method
-  QueryPerformanceCounter(FStartCounter);
+  if UsePerformanceCounter then
+    QueryPerformanceCounter(FStartCounter)
+  else
+    FStartCounter := InternalGetTickCount64;
 end;
 
-procedure TPerformance.Stop;
+procedure TTimeInterval.Stop;
 var
   ACounter: Int64;
 begin
   // Request a counter at the very beginning of the method
-  QueryPerformanceCounter(ACounter);
+  if UsePerformanceCounter then
+    QueryPerformanceCounter(ACounter)
+  else
+    ACounter := InternalGetTickCount64;
+
   FIsRunning := False;
   FElapsedTicks := ACounter - FStartCounter - PerformanceIgnoredTicks;
   if FElapsedTicks < 0 then
@@ -175,36 +203,42 @@ end;
 
 { TPerformanceEvent }
 
-function TPerformanceEvent.ElapsedMilliseconds: Int64;
+function TTimeIntervalEvent.ElapsedMilliseconds: Int64;
 begin
   Result := Round(ElapsedSeconds * 1000);
 end;
 
-function TPerformanceEvent.ElapsedMicroseconds: Int64;
+function TTimeIntervalEvent.ElapsedMicroseconds: Int64;
 begin
   Result := Round(ElapsedSeconds * 1000000);
 end;
 
-function TPerformanceEvent.ElapsedSeconds: Double;
+function TTimeIntervalEvent.ElapsedSeconds: Double;
 begin
   Result := ElapsedTicks / PerformanceFrequency;
 end;
 
-function TPerformanceEvent.ElapsedTicks: Int64;
+function TTimeIntervalEvent.ElapsedTicks: Int64;
 begin
   Result := EndCounter - BegCounter;
 end;
 
-procedure TPerformanceEvent.Start(AName: string);
+procedure TTimeIntervalEvent.Start(AName: string);
 begin
   BegDateTime := Now;
   EventName   := AName;
-  QueryPerformanceCounter(BegCounter);
+  if UsePerformanceCounter then
+    QueryPerformanceCounter(BegCounter)
+  else
+    BegCounter := InternalGetTickCount64;
 end;
 
-procedure TPerformanceEvent.Stop;
+procedure TTimeIntervalEvent.Stop;
 begin
-  QueryPerformanceCounter(EndCounter);
+  if UsePerformanceCounter then
+    QueryPerformanceCounter(EndCounter)
+  else
+    EndCounter := InternalGetTickCount64;
   EndCounter := EndCounter - PerformanceIgnoredTicks;
   if EndCounter < BegCounter then
     EndCounter := BegCounter;
@@ -213,11 +247,11 @@ end;
 
 { TPerformanceEvents }
 
-function TPerformanceEvents.GetEventsAsString(
-  EvOp: TGetPerformanceEventsOptions): string;
+function TTimeIntervalEvents.GetEventsAsString(
+  EvOp: TTimeIntervalGetEventsOptions): string;
 var
-  Ev, EvFirst: TPerformanceEvent;
-  s: string;
+  Ev, EvFirst: TTimeIntervalEvent;
+  s, sTimeMask: string;
   I: Integer;
   AllTime, AllTicks: Int64;
   Sec: Double;
@@ -229,10 +263,15 @@ begin
     Exit;
   end;
 
+  if eoWriteDate in EvOp then
+    sTimeMask := 'dd.mm.yy hh:nn:ss.zzz'
+  else
+    sTimeMask := 'hh:nn:ss.zzz';
+
   EvFirst := Events[0];
   if eoWriteStartTime in EvOp then
   begin
-    Result := 'StartTime: ' + FormatDateTime('dd.mm.yy hh:nn:ss.zzz', EvFirst.BegDateTime);
+    Result := 'StartTime: ' + FormatDateTime(sTimeMask, EvFirst.BegDateTime);
     if eoWriteAllTime in EvOp then
       Result := Result + '; ';
   end;
@@ -262,9 +301,9 @@ begin
       s := IntToStr(Ev.ElapsedMilliseconds) + ' ms';
 
     if eoWriteBegTime in EvOp then
-      s := s + '; BegTime: ' + FormatDateTime('dd.mm.yy hh:nn:ss.zzz', Ev.BegDateTime);
+      s := s + '; BegTime: ' + FormatDateTime(sTimeMask, Ev.BegDateTime);
     if eoWriteEndTime in EvOp then
-      s := s + '; EndTime: ' + FormatDateTime('dd.mm.yy hh:nn:ss.zzz', Ev.EndDateTime);
+      s := s + '; EndTime: ' + FormatDateTime(sTimeMask, Ev.EndDateTime);
 
     if eoWriteFromStart in EvOp then
     begin
@@ -284,7 +323,7 @@ begin
   end;
 end;
 
-procedure TPerformanceEvents.StartEvent(EventName: string);
+procedure TTimeIntervalEvents.StartEvent(EventName: string);
 var
   Cnt: Integer;
 begin
@@ -295,7 +334,7 @@ begin
   Events[Cnt].Start(EventName);
 end;
 
-procedure TPerformanceEvents.StopEvent(EventName: string = '');
+procedure TTimeIntervalEvents.StopEvent(EventName: string = '');
 var
   Idx: Integer;
 begin
@@ -317,8 +356,9 @@ end;
 
 initialization
   // We get the frequency of the high-frequency timer
-  QueryPerformanceFrequency(PerformanceFrequency);
-  if PerformanceFrequency = 0 then
-    PerformanceFrequency := 1; // To avoid division by zero
-  CalcIgnoredPerformanceTicks;
+  UsePerformanceCounter := QueryPerformanceFrequency(PerformanceFrequency);
+  if UsePerformanceCounter then
+    CalcIgnoredPerformanceTicks
+  else
+    PerformanceFrequency := 1000; // impossible condition ???
 end.
