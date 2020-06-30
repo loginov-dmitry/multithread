@@ -3,7 +3,8 @@ program Ex5Proj;
 uses
   Forms,
   Ex5Unit in 'Ex5Unit.pas' {Form1},
-  MTUtils in '..\CommonUtils\MTUtils.pas';
+  MTUtils in '..\CommonUtils\MTUtils.pas',
+  TimeIntervals in '..\CommonUtils\TimeIntervals.pas';
 
 {$R *.res}
 

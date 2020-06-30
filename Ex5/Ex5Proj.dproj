@@ -22,42 +22,7 @@
     <Borland.Personality>Delphi.Personality</Borland.Personality>
     <Borland.ProjectType>VCLApplication</Borland.ProjectType>
     <BorlandProject>
-<BorlandProject xmlns=""> <Delphi.Personality>   <Parameters>
-      <Parameters Name="UseLauncher">False</Parameters>
-      <Parameters Name="LoadAllSymbols">True</Parameters>
-      <Parameters Name="LoadUnspecifiedSymbols">False</Parameters>
-    </Parameters>
-    <VersionInfo>
-      <VersionInfo Name="IncludeVerInfo">False</VersionInfo>
-      <VersionInfo Name="AutoIncBuild">False</VersionInfo>
-      <VersionInfo Name="MajorVer">1</VersionInfo>
-      <VersionInfo Name="MinorVer">0</VersionInfo>
-      <VersionInfo Name="Release">0</VersionInfo>
-      <VersionInfo Name="Build">0</VersionInfo>
-      <VersionInfo Name="Debug">False</VersionInfo>
-      <VersionInfo Name="PreRelease">False</VersionInfo>
-      <VersionInfo Name="Special">False</VersionInfo>
-      <VersionInfo Name="Private">False</VersionInfo>
-      <VersionInfo Name="DLL">False</VersionInfo>
-      <VersionInfo Name="Locale">1049</VersionInfo>
-      <VersionInfo Name="CodePage">1251</VersionInfo>
-    </VersionInfo>
-    <VersionInfoKeys>
-      <VersionInfoKeys Name="CompanyName"></VersionInfoKeys>
-      <VersionInfoKeys Name="FileDescription"></VersionInfoKeys>
-      <VersionInfoKeys Name="FileVersion">1.0.0.0</VersionInfoKeys>
-      <VersionInfoKeys Name="InternalName"></VersionInfoKeys>
-      <VersionInfoKeys Name="LegalCopyright"></VersionInfoKeys>
-      <VersionInfoKeys Name="LegalTrademarks"></VersionInfoKeys>
-      <VersionInfoKeys Name="OriginalFilename"></VersionInfoKeys>
-      <VersionInfoKeys Name="ProductName"></VersionInfoKeys>
-      <VersionInfoKeys Name="ProductVersion">1.0.0.0</VersionInfoKeys>
-      <VersionInfoKeys Name="Comments"></VersionInfoKeys>
-    </VersionInfoKeys>
-    <Source>
-      <Source Name="MainSource">Ex5Proj.dpr</Source>
-    </Source>
-  </Delphi.Personality> </BorlandProject></BorlandProject>
+<BorlandProject><Delphi.Personality><Parameters><Parameters Name="UseLauncher">False</Parameters><Parameters Name="LoadAllSymbols">True</Parameters><Parameters Name="LoadUnspecifiedSymbols">False</Parameters></Parameters><VersionInfo><VersionInfo Name="IncludeVerInfo">False</VersionInfo><VersionInfo Name="AutoIncBuild">False</VersionInfo><VersionInfo Name="MajorVer">1</VersionInfo><VersionInfo Name="MinorVer">0</VersionInfo><VersionInfo Name="Release">0</VersionInfo><VersionInfo Name="Build">0</VersionInfo><VersionInfo Name="Debug">False</VersionInfo><VersionInfo Name="PreRelease">False</VersionInfo><VersionInfo Name="Special">False</VersionInfo><VersionInfo Name="Private">False</VersionInfo><VersionInfo Name="DLL">False</VersionInfo><VersionInfo Name="Locale">1049</VersionInfo><VersionInfo Name="CodePage">1251</VersionInfo></VersionInfo><VersionInfoKeys><VersionInfoKeys Name="CompanyName"></VersionInfoKeys><VersionInfoKeys Name="FileDescription"></VersionInfoKeys><VersionInfoKeys Name="FileVersion">1.0.0.0</VersionInfoKeys><VersionInfoKeys Name="InternalName"></VersionInfoKeys><VersionInfoKeys Name="LegalCopyright"></VersionInfoKeys><VersionInfoKeys Name="LegalTrademarks"></VersionInfoKeys><VersionInfoKeys Name="OriginalFilename"></VersionInfoKeys><VersionInfoKeys Name="ProductName"></VersionInfoKeys><VersionInfoKeys Name="ProductVersion">1.0.0.0</VersionInfoKeys><VersionInfoKeys Name="Comments"></VersionInfoKeys></VersionInfoKeys><Source><Source Name="MainSource">Ex5Proj.dpr</Source></Source></Delphi.Personality></BorlandProject></BorlandProject>
   </ProjectExtensions>
   <Import Project="$(MSBuildBinPath)\Borland.Delphi.Targets" />
   <ItemGroup>
@@ -65,6 +30,7 @@
       <MainSource>MainSource</MainSource>
     </DelphiCompile>
     <DCCReference Include="..\CommonUtils\MTUtils.pas" />
+    <DCCReference Include="..\CommonUtils\TimeIntervals.pas" />
     <DCCReference Include="Ex5Unit.pas">
       <Form>Form1</Form>
     </DCCReference>

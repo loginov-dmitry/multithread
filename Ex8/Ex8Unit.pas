@@ -78,20 +78,15 @@ end;
 procedure TForm1.Button1Click(Sender: TObject);
 var
   p: TTimeIntervalEvents;
-  //p1, p2: Int64;
 begin
-  {QueryPerformanceCounter(p1);
-  QueryPerformanceCounter(p2);
-  ShowMessageFmt('p1=%d, p2=%d', [p1,p2]);}
   p.StartEvent('Этап 1');
-  //Sleep(1);
-  p.StopEvent();
+  Sleep(1);
+  p.StopEvent('Этап 1');
+
   p.StartEvent('Этап 2');
   Sleep(20);
-  p.StopEvent();
-  p.StartEvent('Этап 3');
-  Sleep(30);
-  p.StopEvent('Этап 3');
+  p.StopEvent('Этап 2');
+
   ShowMessage(p.GetEventsAsString([eoWriteStartTime, eoWriteAllTime,
     eoUseMicroSec, eoWriteFromStart, eoWriteBegTime, eoWriteEndTime, eoWriteDate]));
   //ShowMessage(p.GetEventsAsString([eoUseMicroSec]));
@@ -101,16 +96,11 @@ procedure TForm1.Button2Click(Sender: TObject);
 var
   p: TTimeInterval;
 begin
-  p.Start;
+  //p.Start;
+  p := TTimeInterval.StartNew;
   Sleep(100);
-  //p.Stop;
-  {ShowMessageFmt('%d', [p.ElapsedMilliseconds]);
-    ShowMessageFmt('%d', [p.ElapsedMilliseconds]);
-      ShowMessageFmt('%d', [p.ElapsedMilliseconds]); }
-
   ShowMessageFmt('%s', [FormatDateTime('hh:nn:ss.zzz', p.ElapsedTime)]);
   ShowMessageFmt('%s', [FormatDateTime('hh:nn:ss.zzz', p.ElapsedTime)]);
-    ShowMessageFmt('%s', [FormatDateTime('hh:nn:ss.zzz', p.ElapsedTime)]);
 end;
 
 procedure TForm1.FormDestroy(Sender: TObject);

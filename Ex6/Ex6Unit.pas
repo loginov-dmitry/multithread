@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, ProgressViewer, MTUtils;
+  Dialogs, StdCtrls, ProgressViewer, MTUtils, TimeIntervals;
 
 type
   TMyThread = class(TThread)
@@ -76,13 +76,14 @@ end;
 
 procedure TMyThread.Execute;
 var
-  perf: TPerformance;
+  ti: TTimeInterval;
 begin
   FreeOnTerminate := True;
 
-  // Организуем паузу 10 секунд. При этом каждые 20 мс проверяем флаг StopThreadsFlag
-  perf.Start;
-  while perf.SecondSince(False) < 10 do
+  // Организуем паузу 10 секунд. При этом каждые 20 мс
+  // проверяем флаг StopThreadsFlag
+  ti.Start;
+  while ti.ElapsedSeconds < 10 do
   begin
     // Заканчиваем ожидание, если выставлен флаг StopThreadsFlag
     if StopThreadsFlag then Break;

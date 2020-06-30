@@ -49,6 +49,7 @@ procedure ThreadShowMessage(Msg: string);
 
 var
   StringProtectSection: TCriticalSection;
+  ThreadWaitTimeoutSleepTime: Cardinal = 20;
 
 implementation
 
@@ -114,8 +115,8 @@ begin
   begin
     if T.Terminated or (p.ElapsedMilliseconds >= ATimeout) then
       Exit;
-    // Замораживаем поток примерно на 10 мс
-    Sleep(10);
+    // Замораживаем поток примерно на 20 мс
+    Sleep(ThreadWaitTimeoutSleepTime);
   end;
 end;
 

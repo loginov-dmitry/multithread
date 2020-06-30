@@ -45,6 +45,9 @@ type
     // Starts measuring
     procedure Start;
 
+    // For supporting inline variables (var ti := TTimeInterval.StartNew)
+    class function StartNew: TTimeInterval; static;
+
     // Finishes measuring. Updates the FElapsedTicks field. After the Stop method
     // is called, the ElapsedXXX methods will return the value stored in FElapsedTicks
     procedure Stop;
@@ -183,6 +186,11 @@ begin
     QueryPerformanceCounter(FStartCounter)
   else
     FStartCounter := InternalGetTickCount64;
+end;
+
+class function TTimeInterval.StartNew: TTimeInterval;
+begin
+  Result.Start;
 end;
 
 procedure TTimeInterval.Stop;
