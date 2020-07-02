@@ -1,4 +1,4 @@
-unit Ex8Unit;
+п»їunit Ex8Unit;
 
 interface
 
@@ -13,7 +13,7 @@ type
     FResult: Int64;
     FCurrValue: Integer;
 
-    // Информация о текущем состоянии потока
+    // РРЅС„РѕСЂРјР°С†РёСЏ Рѕ С‚РµРєСѓС‰РµРј СЃРѕСЃС‚РѕСЏРЅРёРё РїРѕС‚РѕРєР°
     FThreadStateInfo: string;
 
     function GetThreadStateInfo: string;
@@ -24,8 +24,8 @@ type
     property CalcResult: Int64 read FResult;
     property CurrValue: Integer read FCurrValue;
 
-    // Свойство для доступа к строке FThreadStateInfo с помощью
-    // потокозащищенных методов GetThreadStateInfo и SetThreadStateInfo
+    // РЎРІРѕР№СЃС‚РІРѕ РґР»СЏ РґРѕСЃС‚СѓРїР° Рє СЃС‚СЂРѕРєРµ FThreadStateInfo СЃ РїРѕРјРѕС‰СЊСЋ
+    // РїРѕС‚РѕРєРѕР·Р°С‰РёС‰РµРЅРЅС‹С… РјРµС‚РѕРґРѕРІ GetThreadStateInfo Рё SetThreadStateInfo
     property ThreadStateInfo: string read GetThreadStateInfo write SetThreadStateInfo;
   end;
 
@@ -38,13 +38,9 @@ type
     Timer1: TTimer;
     Label2: TLabel;
     labThreadStateInfo: TLabel;
-    Button1: TButton;
-    Button2: TButton;
     procedure btnRunInParallelThreadClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
-    procedure Button1Click(Sender: TObject);
-    procedure Button2Click(Sender: TObject);
   private
     { Private declarations }
     FMyThread: TMyThread;
@@ -62,7 +58,7 @@ procedure TForm1.btnRunInParallelThreadClick(Sender: TObject);
 var
   MaxValue: Integer;
 begin
-  // Уничтожаем запущенный поток
+  // РЈРЅРёС‡С‚РѕР¶Р°РµРј Р·Р°РїСѓС‰РµРЅРЅС‹Р№ РїРѕС‚РѕРє
   if Assigned(FMyThread) then
     FreeAndNil(FMyThread);
 
@@ -73,34 +69,6 @@ begin
   labThreadStateInfo.Caption := '???';
 
   FMyThread := TMyThread.Create(MaxValue);
-end;
-
-procedure TForm1.Button1Click(Sender: TObject);
-var
-  p: TTimeIntervalEvents;
-begin
-  p.StartEvent('Этап 1');
-  Sleep(1);
-  p.StopEvent('Этап 1');
-
-  p.StartEvent('Этап 2');
-  Sleep(20);
-  p.StopEvent('Этап 2');
-
-  ShowMessage(p.GetEventsAsString([eoWriteStartTime, eoWriteAllTime,
-    eoUseMicroSec, eoWriteFromStart, eoWriteBegTime, eoWriteEndTime, eoWriteDate]));
-  //ShowMessage(p.GetEventsAsString([eoUseMicroSec]));
-end;
-
-procedure TForm1.Button2Click(Sender: TObject);
-var
-  p: TTimeInterval;
-begin
-  //p.Start;
-  p := TTimeInterval.StartNew;
-  Sleep(100);
-  ShowMessageFmt('%s', [FormatDateTime('hh:nn:ss.zzz', p.ElapsedTime)]);
-  ShowMessageFmt('%s', [FormatDateTime('hh:nn:ss.zzz', p.ElapsedTime)]);
 end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
@@ -143,19 +111,19 @@ end;
 
 function TMyThread.GetThreadStateInfo: string;
 begin
-  // Защищаем строку с помощью критической секции. Если её убрать,
-  // то в главном потоке периодически будет возникать ошибка
-  // "Invalid pointer operation" либо "Out of memory"
-  StringProtectSection.Enter; // Входим в режим защиты
+  // Р—Р°С‰РёС‰Р°РµРј СЃС‚СЂРѕРєСѓ СЃ РїРѕРјРѕС‰СЊСЋ РєСЂРёС‚РёС‡РµСЃРєРѕР№ СЃРµРєС†РёРё. Р•СЃР»Рё РµС‘ СѓР±СЂР°С‚СЊ,
+  // С‚Рѕ РІ РіР»Р°РІРЅРѕРј РїРѕС‚РѕРєРµ РїРµСЂРёРѕРґРёС‡РµСЃРєРё Р±СѓРґРµС‚ РІРѕР·РЅРёРєР°С‚СЊ РѕС€РёР±РєР°
+  // "Invalid pointer operation" Р»РёР±Рѕ "Out of memory"
+  StringProtectSection.Enter; // Р’С…РѕРґРёРј РІ СЂРµР¶РёРј Р·Р°С‰РёС‚С‹
   Result := FThreadStateInfo;
-  StringProtectSection.Leave; // Выходим из режима защиты
+  StringProtectSection.Leave; // Р’С‹С…РѕРґРёРј РёР· СЂРµР¶РёРјР° Р·Р°С‰РёС‚С‹
 end;
 
 procedure TMyThread.SetThreadStateInfo(const Value: string);
 begin
-  StringProtectSection.Enter; // Входим в режим защиты
+  StringProtectSection.Enter; // Р’С…РѕРґРёРј РІ СЂРµР¶РёРј Р·Р°С‰РёС‚С‹
   FThreadStateInfo := Value;
-  StringProtectSection.Leave; // Выходим из режима защиты
+  StringProtectSection.Leave; // Р’С‹С…РѕРґРёРј РёР· СЂРµР¶РёРјР° Р·Р°С‰РёС‚С‹
 end;
 
 end.

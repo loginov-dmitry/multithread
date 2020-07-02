@@ -1,4 +1,4 @@
-unit Ex4Unit;
+п»їunit Ex4Unit;
 
 interface
 
@@ -10,9 +10,9 @@ type
   TMyLongThread = class(TThread)
   private
     FTaskNum: Integer;
-    procedure DoUsefullTask1; // Первая задача
-    procedure DoUsefullTask2; // Вторая задача
-    procedure DoFinalizeTask; // Задача запускается при завершении работы потока
+    procedure DoUsefullTask1; // РџРµСЂРІР°СЏ Р·Р°РґР°С‡Р°
+    procedure DoUsefullTask2; // Р’С‚РѕСЂР°СЏ Р·Р°РґР°С‡Р°
+    procedure DoFinalizeTask; // Р—Р°РґР°С‡Р° Р·Р°РїСѓСЃРєР°РµС‚СЃСЏ РїСЂРё Р·Р°РІРµСЂС€РµРЅРёРё СЂР°Р±РѕС‚С‹ РїРѕС‚РѕРєР°
   public
     constructor Create(TaskNum: Integer);
     procedure Execute; override;
@@ -26,8 +26,8 @@ type
     procedure FormDestroy(Sender: TObject);
   private
     { Private declarations }
-    MyThread1: TMyLongThread; // Поток для первой задачи
-    MyThread2: TMyLongThread; // Поток для второй задачи
+    MyThread1: TMyLongThread; // РџРѕС‚РѕРє РґР»СЏ РїРµСЂРІРѕР№ Р·Р°РґР°С‡Рё
+    MyThread2: TMyLongThread; // РџРѕС‚РѕРє РґР»СЏ РІС‚РѕСЂРѕР№ Р·Р°РґР°С‡Рё
   public
     { Public declarations }
   end;
@@ -41,11 +41,11 @@ implementation
 
 procedure TForm1.btnRunParallelThreadsClick(Sender: TObject);
 begin
-  // Запускает параллельный поток для задачи 1
+  // Р—Р°РїСѓСЃРєР°РµС‚ РїР°СЂР°Р»Р»РµР»СЊРЅС‹Р№ РїРѕС‚РѕРє РґР»СЏ Р·Р°РґР°С‡Рё 1
   if MyThread1 = nil then
     MyThread1 := TMyLongThread.Create(1);
 
-  // Запускает параллельный поток для задачи 2
+  // Р—Р°РїСѓСЃРєР°РµС‚ РїР°СЂР°Р»Р»РµР»СЊРЅС‹Р№ РїРѕС‚РѕРє РґР»СЏ Р·Р°РґР°С‡Рё 2
   if MyThread2 = nil then
     MyThread2 := TMyLongThread.Create(2);
 end;
@@ -54,25 +54,25 @@ end;
 
 constructor TMyLongThread.Create(TaskNum: Integer);
 begin
-  inherited Create(False); // Вызываем родительский конструктор
+  inherited Create(False); // Р’С‹Р·С‹РІР°РµРј СЂРѕРґРёС‚РµР»СЊСЃРєРёР№ РєРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ
 
-  // Запоминаем параметр TaskNum. Он нужен в методе Execute
+  // Р—Р°РїРѕРјРёРЅР°РµРј РїР°СЂР°РјРµС‚СЂ TaskNum. РћРЅ РЅСѓР¶РµРЅ РІ РјРµС‚РѕРґРµ Execute
   FTaskNum := TaskNum;
 end;
 
 procedure TMyLongThread.DoFinalizeTask;
 begin
-  Sleep(5000); // Данная условная задача занимает 5 секунд
+  Sleep(5000); // Р”Р°РЅРЅР°СЏ СѓСЃР»РѕРІРЅР°СЏ Р·Р°РґР°С‡Р° Р·Р°РЅРёРјР°РµС‚ 5 СЃРµРєСѓРЅРґ
 end;
 
 procedure TMyLongThread.DoUsefullTask1;
 begin
-  Sleep(1000); // Данная условная задача занимает 1 секунду
+  Sleep(1000); // Р”Р°РЅРЅР°СЏ СѓСЃР»РѕРІРЅР°СЏ Р·Р°РґР°С‡Р° Р·Р°РЅРёРјР°РµС‚ 1 СЃРµРєСѓРЅРґСѓ
 end;
 
 procedure TMyLongThread.DoUsefullTask2;
 begin
-  Sleep(2000); // Данная условная задача занимает 2 секунды
+  Sleep(2000); // Р”Р°РЅРЅР°СЏ СѓСЃР»РѕРІРЅР°СЏ Р·Р°РґР°С‡Р° Р·Р°РЅРёРјР°РµС‚ 2 СЃРµРєСѓРЅРґС‹
 end;
 
 procedure TMyLongThread.Execute;
@@ -85,17 +85,17 @@ begin
   begin
     if Terminated then
     begin
-      DoFinalizeTask; // Некоторые действия при завершении потока
-      Exit; // Завершаем работу потока
+      DoFinalizeTask; // РќРµРєРѕС‚РѕСЂС‹Рµ РґРµР№СЃС‚РІРёСЏ РїСЂРё Р·Р°РІРµСЂС€РµРЅРёРё РїРѕС‚РѕРєР°
+      Exit; // Р—Р°РІРµСЂС€Р°РµРј СЂР°Р±РѕС‚Сѓ РїРѕС‚РѕРєР°
     end else
     begin
       if FTaskNum = 1 then
-        DoUsefullTask1  // Запускаем задачу 1
+        DoUsefullTask1  // Р—Р°РїСѓСЃРєР°РµРј Р·Р°РґР°С‡Сѓ 1
       else
-        DoUsefullTask2; // Запускаем задачу 2
+        DoUsefullTask2; // Р—Р°РїСѓСЃРєР°РµРј Р·Р°РґР°С‡Сѓ 2
 
-      if not Terminated then // Дополнительная проверка не повредит!
-        WaitTimeout(1000); // Ожидаем таймаут 1 сек
+      if not Terminated then // Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅР°СЏ РїСЂРѕРІРµСЂРєР° РЅРµ РїРѕРІСЂРµРґРёС‚!
+        WaitTimeout(1000); // РћР¶РёРґР°РµРј С‚Р°Р№РјР°СѓС‚ 1 СЃРµРє
     end;
   end;
 end;
@@ -104,14 +104,14 @@ procedure TForm1.FormDestroy(Sender: TObject);
 var
   AProgress: TProgressViewer;
 begin
-  AProgress := TProgressViewer.Create('Выход из программы');
+  AProgress := TProgressViewer.Create('Р’С‹С…РѕРґ РёР· РїСЂРѕРіСЂР°РјРјС‹');
   try
     if cbTerminateMode.ItemIndex = 1 then
-    begin // Выбран режим "Одновременно (быстрее)"
+    begin // Р’С‹Р±СЂР°РЅ СЂРµР¶РёРј "РћРґРЅРѕРІСЂРµРјРµРЅРЅРѕ (Р±С‹СЃС‚СЂРµРµ)"
       if Assigned(MyThread1) then
-        MyThread1.Terminate; // Выставляем флаг Terminated
+        MyThread1.Terminate; // Р’С‹СЃС‚Р°РІР»СЏРµРј С„Р»Р°Рі Terminated
       if Assigned(MyThread2) then
-        MyThread2.Terminate; // Выставляем флаг Terminated
+        MyThread2.Terminate; // Р’С‹СЃС‚Р°РІР»СЏРµРј С„Р»Р°Рі Terminated
     end;
     MyThread1.Free;
     MyThread2.Free;

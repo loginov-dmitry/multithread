@@ -1,4 +1,4 @@
-unit Ex7Unit;
+п»їunit Ex7Unit;
 
 interface
 
@@ -41,17 +41,17 @@ implementation
 
 procedure TForm1.btnRunInParallelThreadClick(Sender: TObject);
 begin
-  // Уничтожаем запущенный поток
+  // РЈРЅРёС‡С‚РѕР¶Р°РµРј Р·Р°РїСѓС‰РµРЅРЅС‹Р№ РїРѕС‚РѕРє
   if Assigned(FMyThread) then
     FreeAndNil(FMyThread);
 
-  // Создаём поток в спящем состоянии
+  // РЎРѕР·РґР°С‘Рј РїРѕС‚РѕРє РІ СЃРїСЏС‰РµРј СЃРѕСЃС‚РѕСЏРЅРёРё
   FMyThread := TMyThread.Create(True);
 
-  // Запоминаем длину ряда в поле MaxValue
+  // Р—Р°РїРѕРјРёРЅР°РµРј РґР»РёРЅСѓ СЂСЏРґР° РІ РїРѕР»Рµ MaxValue
   FMyThread.MaxValue := StrToIntDef(edMaxValue.Text, 0);
 
-  // Пробуждаем поток для выполнения вычислений
+  // РџСЂРѕР±СѓР¶РґР°РµРј РїРѕС‚РѕРє РґР»СЏ РІС‹РїРѕР»РЅРµРЅРёСЏ РІС‹С‡РёСЃР»РµРЅРёР№
   FMyThread.Resume;
 end;
 
@@ -67,10 +67,10 @@ var
   Res: Int64;
   CurrVal: Integer;
 begin
-  // Выставляем параметры компонента ProgressBar1
+  // Р’С‹СЃС‚Р°РІР»СЏРµРј РїР°СЂР°РјРµС‚СЂС‹ РєРѕРјРїРѕРЅРµРЅС‚Р° ProgressBar1
   Synchronize(SetProgressParams);
 
-  // Выполняем некоторые вычисления
+  // Р’С‹РїРѕР»РЅСЏРµРј РЅРµРєРѕС‚РѕСЂС‹Рµ РІС‹С‡РёСЃР»РµРЅРёСЏ
   Res := 0;
   CurrVal := 0;
   while CurrVal < MaxValue do
@@ -80,14 +80,14 @@ begin
     Res := Res + CurrVal;
 
     if CurrVal mod 10000 = 0 then
-    begin // Обновление прогресса выполняется только 1 раз из 10000
+    begin // РћР±РЅРѕРІР»РµРЅРёРµ РїСЂРѕРіСЂРµСЃСЃР° РІС‹РїРѕР»РЅСЏРµС‚СЃСЏ С‚РѕР»СЊРєРѕ 1 СЂР°Р· РёР· 10000
       FCurrValue := CurrVal;
       FResult    := Res;
       Synchronize(SetProgressCurrValue);
     end;
   end;
 
-  // Обновляем прогресс в конце вычислений
+  // РћР±РЅРѕРІР»СЏРµРј РїСЂРѕРіСЂРµСЃСЃ РІ РєРѕРЅС†Рµ РІС‹С‡РёСЃР»РµРЅРёР№
   FCurrValue := CurrVal;
   FResult    := Res;
   Synchronize(SetProgressCurrValue);

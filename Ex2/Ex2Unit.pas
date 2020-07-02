@@ -1,4 +1,4 @@
-unit Ex2Unit;
+п»їunit Ex2Unit;
 
 interface
 
@@ -9,7 +9,7 @@ uses
 type
   TMyLongThread = class(TThread)
   private
-    procedure DoUsefullTask; // Процедура для имитации полезной работы
+    procedure DoUsefullTask; // РџСЂРѕС†РµРґСѓСЂР° РґР»СЏ РёРјРёС‚Р°С†РёРё РїРѕР»РµР·РЅРѕР№ СЂР°Р±РѕС‚С‹
   public
     procedure Execute; override;
   end;
@@ -34,20 +34,20 @@ implementation
 
 procedure TForm1.btnRunParallelThreadClick(Sender: TObject);
 begin
-  // Запускает параллельный поток
+  // Р—Р°РїСѓСЃРєР°РµС‚ РїР°СЂР°Р»Р»РµР»СЊРЅС‹Р№ РїРѕС‚РѕРє
   if MyThread = nil then
     MyThread := TMyLongThread.Create(False)
   else
-    raise Exception.Create('Дополнительный поток уже запущен!');
+    raise Exception.Create('Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Р№ РїРѕС‚РѕРє СѓР¶Рµ Р·Р°РїСѓС‰РµРЅ!');
 end;
 
 { TMyLongThread }
 
 procedure TMyLongThread.DoUsefullTask;
 begin
-  // Реальный поток может выполнять какую угодно полезную работу
-  // В учебных целях делаем паузу 5 секунд для имитации задержки, которая
-  // может возникнуть при выполнении полезной работы
+  // Р РµР°Р»СЊРЅС‹Р№ РїРѕС‚РѕРє РјРѕР¶РµС‚ РІС‹РїРѕР»РЅСЏС‚СЊ РєР°РєСѓСЋ СѓРіРѕРґРЅРѕ РїРѕР»РµР·РЅСѓСЋ СЂР°Р±РѕС‚Сѓ
+  // Р’ СѓС‡РµР±РЅС‹С… С†РµР»СЏС… РґРµР»Р°РµРј РїР°СѓР·Сѓ 5 СЃРµРєСѓРЅРґ РґР»СЏ РёРјРёС‚Р°С†РёРё Р·Р°РґРµСЂР¶РєРё, РєРѕС‚РѕСЂР°СЏ
+  // РјРѕР¶РµС‚ РІРѕР·РЅРёРєРЅСѓС‚СЊ РїСЂРё РІС‹РїРѕР»РЅРµРЅРёРё РїРѕР»РµР·РЅРѕР№ СЂР°Р±РѕС‚С‹
   Sleep(5000);
 end;
 
@@ -60,14 +60,14 @@ begin
   while not Terminated do
   begin
     DoUsefullTask;
-    WaitTimeout(10000); // Ожидаем таймаут 10 сек.
+    WaitTimeout(10000); // РћР¶РёРґР°РµРј С‚Р°Р№РјР°СѓС‚ 10 СЃРµРє.
   end;
 end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
 begin
-  // При закрытии программы необходимо завершить работу потока
-  // и уничтожить объект потока MyThread
+  // РџСЂРё Р·Р°РєСЂС‹С‚РёРё РїСЂРѕРіСЂР°РјРјС‹ РЅРµРѕР±С…РѕРґРёРјРѕ Р·Р°РІРµСЂС€РёС‚СЊ СЂР°Р±РѕС‚Сѓ РїРѕС‚РѕРєР°
+  // Рё СѓРЅРёС‡С‚РѕР¶РёС‚СЊ РѕР±СЉРµРєС‚ РїРѕС‚РѕРєР° MyThread
   if MyThread <> nil then
     MyThread.Free;
 end;

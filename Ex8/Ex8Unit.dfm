@@ -70,24 +70,6 @@ object Form1: TForm1
     TabOrder = 2
     Text = '10000000'
   end
-  object Button1: TButton
-    Left = 280
-    Top = 88
-    Width = 75
-    Height = 25
-    Caption = #1058#1077#1089#1090' '#1079#1072#1084#1077#1088#1086#1074
-    TabOrder = 3
-    OnClick = Button1Click
-  end
-  object Button2: TButton
-    Left = 280
-    Top = 120
-    Width = 75
-    Height = 25
-    Caption = 'Button2'
-    TabOrder = 4
-    OnClick = Button2Click
-  end
   object Timer1: TTimer
     Interval = 100
     OnTimer = Timer1Timer

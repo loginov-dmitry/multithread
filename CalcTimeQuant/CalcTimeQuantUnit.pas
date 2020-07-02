@@ -1,4 +1,4 @@
-unit CalcTimeQuantUnit;
+п»їunit CalcTimeQuantUnit;
 
 interface
 
@@ -9,27 +9,22 @@ uses
 type
   TCalcQuantThread = class(TThread)
   private
-    // Добавляет длительность интервала активности (квант времени)
+    // Р”РѕР±Р°РІР»СЏРµС‚ РґР»РёС‚РµР»СЊРЅРѕСЃС‚СЊ РёРЅС‚РµСЂРІР°Р»Р° Р°РєС‚РёРІРЅРѕСЃС‚Рё (РєРІР°РЅС‚ РІСЂРµРјРµРЅРё)
     procedure AddToWorkList(WorkTime: Double);
 
-    // Добавляет длительность интервала бездействия (в спящем состоянии)
+    // Р”РѕР±Р°РІР»СЏРµС‚ РґР»РёС‚РµР»СЊРЅРѕСЃС‚СЊ РёРЅС‚РµСЂРІР°Р»Р° Р±РµР·РґРµР№СЃС‚РІРёСЏ (РІ СЃРїСЏС‰РµРј СЃРѕСЃС‚РѕСЏРЅРёРё)
     procedure AddToNotWorkList(NotWorkTime: Double);
   protected
     procedure Execute; override;
   public
-    ThreadNum: Integer;           // Номер потока
-    IsFinish: Boolean;            // Флаг "работа потока завершена"
-    WorkAll: Double;              // Общее время работы
-    NotWorkAll: Double;           // Общее время бездействия
-    LoopCount: Integer;           // Количество циклов
-    WorkList: array of Double;    // Длительность выделенных квантов времени
-    NotWorkList: array of Double; // Длительность интервалов простоя
+    ThreadNum: Integer;           // РќРѕРјРµСЂ РїРѕС‚РѕРєР°
+    IsFinish: Boolean;            // Р¤Р»Р°Рі "СЂР°Р±РѕС‚Р° РїРѕС‚РѕРєР° Р·Р°РІРµСЂС€РµРЅР°"
+    WorkAll: Double;              // РћР±С‰РµРµ РІСЂРµРјСЏ СЂР°Р±РѕС‚С‹
+    NotWorkAll: Double;           // РћР±С‰РµРµ РІСЂРµРјСЏ Р±РµР·РґРµР№СЃС‚РІРёСЏ
+    LoopCount: Integer;           // РљРѕР»РёС‡РµСЃС‚РІРѕ С†РёРєР»РѕРІ
+    WorkList: array of Double;    // Р”Р»РёС‚РµР»СЊРЅРѕСЃС‚СЊ РІС‹РґРµР»РµРЅРЅС‹С… РєРІР°РЅС‚РѕРІ РІСЂРµРјРµРЅРё
+    NotWorkList: array of Double; // Р”Р»РёС‚РµР»СЊРЅРѕСЃС‚СЊ РёРЅС‚РµСЂРІР°Р»РѕРІ РїСЂРѕСЃС‚РѕСЏ
     constructor Create(ThreadNum: Integer);
-  end;
-
-  TSleepThread = class(TThread)
-  protected
-    procedure Execute; override;
   end;
 
   TForm1 = class(TForm)
@@ -40,16 +35,13 @@ type
     Label3: TLabel;
     Memo1: TMemo;
     Timer1: TTimer;
-    Button1: TButton;
     procedure btnStartThreadsClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
-    procedure Button1Click(Sender: TObject);
   private
     { Private declarations }
-    FList: TList; // Список запущенных потоков
-    SleepThread: TSleepThread;
+    FList: TList; // РЎРїРёСЃРѕРє Р·Р°РїСѓС‰РµРЅРЅС‹С… РїРѕС‚РѕРєРѕРІ
   public
     { Public declarations }
   end;
@@ -69,11 +61,6 @@ begin
   for I := 1 to StrToInt(edThreadCount.Text) do
     FList.Add(TCalcQuantThread.Create(I));
   btnStartThreads.Enabled := False;
-end;
-
-procedure TForm1.Button1Click(Sender: TObject);
-begin
-  SleepThread := TSleepThread.Create(False);
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
@@ -103,13 +90,13 @@ begin
     T := TCalcQuantThread(FList[I]);
     if T.IsFinish then
     begin
-      s := Format('Интервалы активности потока #%d (Общее время=%f; Число квантов=%d; '+
-        'Число циклов=%d): ', [T.ThreadNum, T.WorkAll, Length(T.WorkList), T.LoopCount]);
+      s := Format('РРЅС‚РµСЂРІР°Р»С‹ Р°РєС‚РёРІРЅРѕСЃС‚Рё РїРѕС‚РѕРєР° #%d (РћР±С‰РµРµ РІСЂРµРјСЏ=%f; Р§РёСЃР»Рѕ РєРІР°РЅС‚РѕРІ=%d; '+
+        'Р§РёСЃР»Рѕ С†РёРєР»РѕРІ=%d): ', [T.ThreadNum, T.WorkAll, Length(T.WorkList), T.LoopCount]);
       for Q in T.WorkList do
         s := s + FormatFloat('0.0000', Q) + ',';
       Memo1.Lines.Add(s);
-      s := Format('Интервалы бездействия потока #%d (Общее время=%f; Число интервалов '+
-        'бездействия=%d): ', [T.ThreadNum, T.NotWorkAll, Length(T.NotWorkList)]);
+      s := Format('РРЅС‚РµСЂРІР°Р»С‹ Р±РµР·РґРµР№СЃС‚РІРёСЏ РїРѕС‚РѕРєР° #%d (РћР±С‰РµРµ РІСЂРµРјСЏ=%f; Р§РёСЃР»Рѕ РёРЅС‚РµСЂРІР°Р»РѕРІ '+
+        'Р±РµР·РґРµР№СЃС‚РІРёСЏ=%d): ', [T.ThreadNum, T.NotWorkAll, Length(T.NotWorkList)]);
       for Q in T.NotWorkList do
         s := s + FormatFloat('0.0000', Q) + ',';
       Memo1.Lines.Add(s + sLineBreak);
@@ -161,26 +148,19 @@ begin
     QueryPerformanceCounter(CurTicks);
     Inc(LoopCount);
     if CurTicks - PrevTicks > QuantDiff then
-    begin // Если разница оказалась больше 1 мс, значит ОС приостанавливала
-          // работу потока и теперь начался отсчёт нового кванта
-      AddToWorkList(CurQuantTime / Freq); // Сохраняем время работы потока
-      AddToNotWorkList((CurTicks - PrevTicks) / Freq); // Сохраняем время простоя потока
+    begin // Р•СЃР»Рё СЂР°Р·РЅРёС†Р° РѕРєР°Р·Р°Р»Р°СЃСЊ Р±РѕР»СЊС€Рµ 1 РјСЃ, Р·РЅР°С‡РёС‚ РћРЎ РїСЂРёРѕСЃС‚Р°РЅР°РІР»РёРІР°Р»Р°
+          // СЂР°Р±РѕС‚Сѓ РїРѕС‚РѕРєР° Рё С‚РµРїРµСЂСЊ РЅР°С‡Р°Р»СЃСЏ РѕС‚СЃС‡С‘С‚ РЅРѕРІРѕРіРѕ РєРІР°РЅС‚Р°
+      AddToWorkList(CurQuantTime / Freq); // РЎРѕС…СЂР°РЅСЏРµРј РІСЂРµРјСЏ СЂР°Р±РѕС‚С‹ РїРѕС‚РѕРєР°
+      AddToNotWorkList((CurTicks - PrevTicks) / Freq); // РЎРѕС…СЂР°РЅСЏРµРј РІСЂРµРјСЏ РїСЂРѕСЃС‚РѕСЏ РїРѕС‚РѕРєР°
       CurQuantStart := CurTicks;
       CurQuantTime := 0;
     end else
       CurQuantTime := CurTicks - CurQuantStart;
     PrevTicks := CurTicks;
   until (CurTicks - StartTicks) > BreakDiff;
-  if CurQuantTime > 0 then // Обрабатываем длительность последнего кванта
+  if CurQuantTime > 0 then // РћР±СЂР°Р±Р°С‚С‹РІР°РµРј РґР»РёС‚РµР»СЊРЅРѕСЃС‚СЊ РїРѕСЃР»РµРґРЅРµРіРѕ РєРІР°РЅС‚Р°
     AddToWorkList(CurQuantTime / Freq);
   IsFinish := True;
-end;
-
-{ TSleepThread }
-
-procedure TSleepThread.Execute;
-begin
-  while not Terminated do Sleep(1);
 end;
 
 end.

@@ -1,4 +1,4 @@
-unit Ex5Unit;
+п»їunit Ex5Unit;
 
 interface
 
@@ -42,7 +42,7 @@ type
     procedure FormCreate(Sender: TObject);
   private
     { Private declarations }
-    FList: TObjectList; // Потоки для первой и второй задачи
+    FList: TObjectList; // РџРѕС‚РѕРєРё РґР»СЏ РїРµСЂРІРѕР№ Рё РІС‚РѕСЂРѕР№ Р·Р°РґР°С‡Рё
   public
     { Public declarations }
   end;
@@ -56,7 +56,7 @@ implementation
 
 procedure TForm1.btnRunParallelThreadsClick(Sender: TObject);
 begin
-  // Запускаем 4 параллельных потока
+  // Р—Р°РїСѓСЃРєР°РµРј 4 РїР°СЂР°Р»Р»РµР»СЊРЅС‹С… РїРѕС‚РѕРєР°
   if FList.Count = 0 then
   begin
     FList.Add(TMyLongThread1.Create(1000));
@@ -70,7 +70,7 @@ end;
 
 constructor TMyLongThread1.Create(UsefullTaskTime: Integer);
 begin
-  inherited Create(False); // Вызываем родительский конструктор
+  inherited Create(False); // Р’С‹Р·С‹РІР°РµРј СЂРѕРґРёС‚РµР»СЊСЃРєРёР№ РєРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ
   FUsefullTaskTime := UsefullTaskTime;
 end;
 
@@ -79,9 +79,9 @@ begin
   while not Terminated do
   begin
     EmulateUsefullWork(FUsefullTaskTime);
-    ThreadWaitTimeout(Self, 60000); // Ожидаем таймаут 60 сек
+    ThreadWaitTimeout(Self, 60000); // РћР¶РёРґР°РµРј С‚Р°Р№РјР°СѓС‚ 60 СЃРµРє
   end;
-  Sleep(5000); // Оставлено для демонстрации режима "Одновременно"  
+  Sleep(5000); // РћСЃС‚Р°РІР»РµРЅРѕ РґР»СЏ РґРµРјРѕРЅСЃС‚СЂР°С†РёРё СЂРµР¶РёРјР° "РћРґРЅРѕРІСЂРµРјРµРЅРЅРѕ"  
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
@@ -94,16 +94,16 @@ var
   AProgress: TProgressViewer;
   I: Integer;
 begin
-  AProgress := TProgressViewer.Create('Выход из программы');
+  AProgress := TProgressViewer.Create('Р’С‹С…РѕРґ РёР· РїСЂРѕРіСЂР°РјРјС‹');
   try
     if cbTerminateMode.ItemIndex = 1 then
-    begin // Выбран режим "Одновременно (быстрее)"
-      // Выставляем флаг Terminated для всех потоков. Можно использовать
-      // родительский класс TThread для операции приведения типов.
+    begin // Р’С‹Р±СЂР°РЅ СЂРµР¶РёРј "РћРґРЅРѕРІСЂРµРјРµРЅРЅРѕ (Р±С‹СЃС‚СЂРµРµ)"
+      // Р’С‹СЃС‚Р°РІР»СЏРµРј С„Р»Р°Рі Terminated РґР»СЏ РІСЃРµС… РїРѕС‚РѕРєРѕРІ. РњРѕР¶РЅРѕ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ
+      // СЂРѕРґРёС‚РµР»СЊСЃРєРёР№ РєР»Р°СЃСЃ TThread РґР»СЏ РѕРїРµСЂР°С†РёРё РїСЂРёРІРµРґРµРЅРёСЏ С‚РёРїРѕРІ.
       for I := 0 to FList.Count - 1 do
         TThread(FList[I]).Terminate;
     end;
-    // При уничтожении списка TObjectList будут уничтожены все объекты потоков
+    // РџСЂРё СѓРЅРёС‡С‚РѕР¶РµРЅРёРё СЃРїРёСЃРєР° TObjectList Р±СѓРґСѓС‚ СѓРЅРёС‡С‚РѕР¶РµРЅС‹ РІСЃРµ РѕР±СЉРµРєС‚С‹ РїРѕС‚РѕРєРѕРІ
     FList.Free;
   finally
     AProgress.TerminateProgress;
@@ -117,9 +117,9 @@ begin
   while not Terminated do
   begin
     EmulateUsefullWork(2000);
-    ThreadWaitTimeout(Self, 60000); // Ожидаем таймаут 60 сек
+    ThreadWaitTimeout(Self, 60000); // РћР¶РёРґР°РµРј С‚Р°Р№РјР°СѓС‚ 60 СЃРµРє
   end;
-  Sleep(5000); // Оставлено для демонстрации режима "Одновременно"
+  Sleep(5000); // РћСЃС‚Р°РІР»РµРЅРѕ РґР»СЏ РґРµРјРѕРЅСЃС‚СЂР°С†РёРё СЂРµР¶РёРјР° "РћРґРЅРѕРІСЂРµРјРµРЅРЅРѕ"
 end;
 
 { TMyLongThread3 }
@@ -135,9 +135,9 @@ begin
   while not Terminated do
   begin
     EmulateUsefullWork(FUsefullTaskTime);
-    ThreadWaitTimeout(Self, 60000); // Ожидаем таймаут 60 сек
+    ThreadWaitTimeout(Self, 60000); // РћР¶РёРґР°РµРј С‚Р°Р№РјР°СѓС‚ 60 СЃРµРє
   end;
-  Sleep(5000); // Оставлено для демонстрации режима "Одновременно"
+  Sleep(5000); // РћСЃС‚Р°РІР»РµРЅРѕ РґР»СЏ РґРµРјРѕРЅСЃС‚СЂР°С†РёРё СЂРµР¶РёРјР° "РћРґРЅРѕРІСЂРµРјРµРЅРЅРѕ"
 end;
 
 { TMyLongThread4 }
@@ -147,9 +147,9 @@ begin
   while not Terminated do
   begin
     EmulateUsefullWork(1000);
-    ThreadWaitTimeout(Self, 60000); // Ожидаем таймаут 60 сек
+    ThreadWaitTimeout(Self, 60000); // РћР¶РёРґР°РµРј С‚Р°Р№РјР°СѓС‚ 60 СЃРµРє
   end;
-  Sleep(5000); // Оставлено для демонстрации режима "Одновременно"
+  Sleep(5000); // РћСЃС‚Р°РІР»РµРЅРѕ РґР»СЏ РґРµРјРѕРЅСЃС‚СЂР°С†РёРё СЂРµР¶РёРјР° "РћРґРЅРѕРІСЂРµРјРµРЅРЅРѕ"
 end;
 
 end.

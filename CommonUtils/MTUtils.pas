@@ -1,4 +1,4 @@
-{
+п»ї{
 Copyright (c) 2020, Loginov Dmitry Sergeevich
 All rights reserved.
 
@@ -34,14 +34,13 @@ uses
 type
   TThreadAccessTerminated = class(TThread);
 
-  // Подсказка самому себе, где находится TObjectList
+  // РџРѕРґСЃРєР°Р·РєР° СЃР°РјРѕРјСѓ СЃРµР±Рµ, РіРґРµ РЅР°С…РѕРґРёС‚СЃСЏ TObjectList
   TObjectListHelp = class(Contnrs.TObjectList);
 
-
-// Простой пример организации паузы в работе потока с контролем свойства Terminate
+// РџСЂРѕСЃС‚РѕР№ РїСЂРёРјРµСЂ РѕСЂРіР°РЅРёР·Р°С†РёРё РїР°СѓР·С‹ РІ СЂР°Р±РѕС‚Рµ РїРѕС‚РѕРєР° СЃ РєРѕРЅС‚СЂРѕР»РµРј СЃРІРѕР№СЃС‚РІР° Terminate
 procedure ThreadWaitTimeout(AThread: TThread; ATimeout: Integer);
 
-// Эмуляция полезной работы
+// Р­РјСѓР»СЏС†РёСЏ РїРѕР»РµР·РЅРѕР№ СЂР°Р±РѕС‚С‹
 procedure EmulateUsefullWork(WorkTime: Integer);
 
 procedure ThreadShowMessageFmt(Msg: string; Args: array of const);
@@ -68,61 +67,61 @@ begin
   Sleep(WorkTime);
 end;
 
-// Реализация, основанная на функции GetTickCount
+// Р РµР°Р»РёР·Р°С†РёСЏ, РѕСЃРЅРѕРІР°РЅРЅР°СЏ РЅР° С„СѓРЅРєС†РёРё GetTickCount
 {procedure ThreadWaitTimeout(AThread: TThread; ATimeout: Integer);
 var
   StartTime, Diff, tc: Cardinal;
   T: TThreadAccessTerminated;
 begin
-  // Получаем доступ к protected-свойству Terminated
+  // РџРѕР»СѓС‡Р°РµРј РґРѕСЃС‚СѓРї Рє protected-СЃРІРѕР№СЃС‚РІСѓ Terminated
   T := TThreadAccessTerminated(AThread);
-  // Если поток нужно завершить, то сразу выходим из цикла
+  // Р•СЃР»Рё РїРѕС‚РѕРє РЅСѓР¶РЅРѕ Р·Р°РІРµСЂС€РёС‚СЊ, С‚Рѕ СЃСЂР°Р·Сѓ РІС‹С…РѕРґРёРј РёР· С†РёРєР»Р°
   if T.Terminated then Exit;
 
-  // Запоминаем текущее время (в миллисекундах от включения компьютера)
+  // Р—Р°РїРѕРјРёРЅР°РµРј С‚РµРєСѓС‰РµРµ РІСЂРµРјСЏ (РІ РјРёР»Р»РёСЃРµРєСѓРЅРґР°С… РѕС‚ РІРєР»СЋС‡РµРЅРёСЏ РєРѕРјРїСЊСЋС‚РµСЂР°)
   StartTime := GetTickCount;
   while True do
   begin
     tc := GetTickCount;
 
-    // Прерываем ожидание, если функция GetTickCount начала новый круг
-    // иначе наша функция ожидания может зависнуть
+    // РџСЂРµСЂС‹РІР°РµРј РѕР¶РёРґР°РЅРёРµ, РµСЃР»Рё С„СѓРЅРєС†РёСЏ GetTickCount РЅР°С‡Р°Р»Р° РЅРѕРІС‹Р№ РєСЂСѓРі
+    // РёРЅР°С‡Рµ РЅР°С€Р° С„СѓРЅРєС†РёСЏ РѕР¶РёРґР°РЅРёСЏ РјРѕР¶РµС‚ Р·Р°РІРёСЃРЅСѓС‚СЊ
     if (tc < StartTime) then Exit;
 
-    // Прерываем ожидание, если превысили указанный таймаут
+    // РџСЂРµСЂС‹РІР°РµРј РѕР¶РёРґР°РЅРёРµ, РµСЃР»Рё РїСЂРµРІС‹СЃРёР»Рё СѓРєР°Р·Р°РЅРЅС‹Р№ С‚Р°Р№РјР°СѓС‚
     Diff := tc - StartTime;
     if (Diff >= ATimeout) or T.Terminated then
       Exit;
 
-    // Замораживаем поток примерно на 20 мс
+    // Р—Р°РјРѕСЂР°Р¶РёРІР°РµРј РїРѕС‚РѕРє РїСЂРёРјРµСЂРЅРѕ РЅР° 20 РјСЃ
     Sleep(20);
   end;
 end; }
 
-// Реализация, основанная на TPerformance
+// Р РµР°Р»РёР·Р°С†РёСЏ, РѕСЃРЅРѕРІР°РЅРЅР°СЏ РЅР° TPerformance
 procedure ThreadWaitTimeout(AThread: TThread; ATimeout: Integer);
 var
   p: TTimeInterval;
   T: TThreadAccessTerminated;
 begin
-  // Получаем доступ к protected-свойству Terminated
+  // РџРѕР»СѓС‡Р°РµРј РґРѕСЃС‚СѓРї Рє protected-СЃРІРѕР№СЃС‚РІСѓ Terminated
   T := TThreadAccessTerminated(AThread);
-  // Если поток нужно завершить, то сразу выходим из цикла
+  // Р•СЃР»Рё РїРѕС‚РѕРє РЅСѓР¶РЅРѕ Р·Р°РІРµСЂС€РёС‚СЊ, С‚Рѕ СЃСЂР°Р·Сѓ РІС‹С…РѕРґРёРј РёР· С†РёРєР»Р°
   if T.Terminated then Exit;
 
-  p.Start; // Начинаем замер времени
+  p.Start; // РќР°С‡РёРЅР°РµРј Р·Р°РјРµСЂ РІСЂРµРјРµРЅРё
   while True do
   begin
     if T.Terminated or (p.ElapsedMilliseconds >= ATimeout) then
       Exit;
-    // Замораживаем поток примерно на 20 мс
+    // Р—Р°РјРѕСЂР°Р¶РёРІР°РµРј РїРѕС‚РѕРє РїСЂРёРјРµСЂРЅРѕ РЅР° 20 РјСЃ
     Sleep(ThreadWaitTimeoutSleepTime);
   end;
 end;
 
 initialization
-  // Критическая секция для защиты строк от
-  // одновременного доступа из разных потоков
+  // РљСЂРёС‚РёС‡РµСЃРєР°СЏ СЃРµРєС†РёСЏ РґР»СЏ Р·Р°С‰РёС‚С‹ СЃС‚СЂРѕРє РѕС‚
+  // РѕРґРЅРѕРІСЂРµРјРµРЅРЅРѕРіРѕ РґРѕСЃС‚СѓРїР° РёР· СЂР°Р·РЅС‹С… РїРѕС‚РѕРєРѕРІ
   StringProtectSection := TCriticalSection.Create;
 
 finalization

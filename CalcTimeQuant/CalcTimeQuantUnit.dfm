@@ -80,15 +80,6 @@ object Form1: TForm1
     ScrollBars = ssVertical
     TabOrder = 2
   end
-  object Button1: TButton
-    Left = 304
-    Top = 168
-    Width = 201
-    Height = 25
-    Caption = #1047#1072#1087#1091#1089#1090#1080#1090#1100' Sleep-'#1087#1086#1090#1086#1082
-    TabOrder = 3
-    OnClick = Button1Click
-  end
   object Timer1: TTimer
     Interval = 500
     OnTimer = Timer1Timer

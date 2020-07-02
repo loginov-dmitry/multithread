@@ -47,7 +47,6 @@ object Form1: TForm1
     Height = 17
     Anchors = [akLeft, akTop, akRight]
     TabOrder = 1
-    ExplicitWidth = 519
   end
   object edMaxValue: TEdit
     Left = 232

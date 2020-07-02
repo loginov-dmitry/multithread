@@ -1,4 +1,4 @@
-unit Ex1Unit;
+п»їunit Ex1Unit;
 
 interface
 
@@ -35,7 +35,7 @@ var
   I: Integer;
 begin
   Result := 0;
-  // Очень длинный цикл. Имитирует длительные вычисления.
+  // РћС‡РµРЅСЊ РґР»РёРЅРЅС‹Р№ С†РёРєР». РРјРёС‚РёСЂСѓРµС‚ РґР»РёС‚РµР»СЊРЅС‹Рµ РІС‹С‡РёСЃР»РµРЅРёСЏ.
   for I := 1 to MaxInt do
     Result := Result + Random(1000);
 end;
@@ -47,7 +47,7 @@ end;
 
 procedure TForm1.btnRunInParallelThreadClick(Sender: TObject);
 begin
-  // Запускает параллельный поток
+  // Р—Р°РїСѓСЃРєР°РµС‚ РїР°СЂР°Р»Р»РµР»СЊРЅС‹Р№ РїРѕС‚РѕРє
   TMyThread.Create(False);
 end;
 
@@ -59,7 +59,7 @@ var
 begin
   FreeOnTerminate := True;
   V := DoLongCalculations;
-  MyShowMessage('Результат: ' + IntToStr(V));
+  MyShowMessage('Р РµР·СѓР»СЊС‚Р°С‚: ' + IntToStr(V));
 end;
 
 procedure TForm1.btnRunInMainThreadClick(Sender: TObject);
@@ -67,7 +67,7 @@ var
   V: Int64;
 begin
   V := DoLongCalculations;
-  MyShowMessage('Результат: ' + IntToStr(V));
+  MyShowMessage('Р РµР·СѓР»СЊС‚Р°С‚: ' + IntToStr(V));
 end;
 
 end.

@@ -1,4 +1,4 @@
-unit Ex6Unit;
+п»їunit Ex6Unit;
 
 interface
 
@@ -36,7 +36,7 @@ implementation
 
 procedure TForm1.btnRunInParallelThreadClick(Sender: TObject);
 begin
-  // Запускаем параллельный поток
+  // Р—Р°РїСѓСЃРєР°РµРј РїР°СЂР°Р»Р»РµР»СЊРЅС‹Р№ РїРѕС‚РѕРє
   TMyThread.Create;
 end;
 
@@ -44,13 +44,13 @@ procedure TForm1.FormDestroy(Sender: TObject);
 var
   pv: TProgressViewer;
 begin
-  // Выставляем флаг StopThreadsFlag, чтобы все потоки завершились
+  // Р’С‹СЃС‚Р°РІР»СЏРµРј С„Р»Р°Рі StopThreadsFlag, С‡С‚РѕР±С‹ РІСЃРµ РїРѕС‚РѕРєРё Р·Р°РІРµСЂС€РёР»РёСЃСЊ
   StopThreadsFlag := True;
   
-  // Задерживаем выход из программы, пока не будут завершены все потоки
+  // Р—Р°РґРµСЂР¶РёРІР°РµРј РІС‹С…РѕРґ РёР· РїСЂРѕРіСЂР°РјРјС‹, РїРѕРєР° РЅРµ Р±СѓРґСѓС‚ Р·Р°РІРµСЂС€РµРЅС‹ РІСЃРµ РїРѕС‚РѕРєРё
   if ThreadCount > 0 then
   begin
-    pv := TProgressViewer.Create('Ожидаем завершение потоков');
+    pv := TProgressViewer.Create('РћР¶РёРґР°РµРј Р·Р°РІРµСЂС€РµРЅРёРµ РїРѕС‚РѕРєРѕРІ');
     while ThreadCount > 0 do
       Sleep(10);
     pv.TerminateProgress;
@@ -62,15 +62,15 @@ end;
 constructor TMyThread.Create;
 begin
   inherited Create(False);
-  // Увеличиваем глобальную переменную ThreadCount на 1 и запоминаем
-  // полученное значение
+  // РЈРІРµР»РёС‡РёРІР°РµРј РіР»РѕР±Р°Р»СЊРЅСѓСЋ РїРµСЂРµРјРµРЅРЅСѓСЋ ThreadCount РЅР° 1 Рё Р·Р°РїРѕРјРёРЅР°РµРј
+  // РїРѕР»СѓС‡РµРЅРЅРѕРµ Р·РЅР°С‡РµРЅРёРµ
   FThreadNum := InterlockedIncrement(ThreadCount);
 end;
 
 destructor TMyThread.Destroy;
 begin
   inherited;
-  // Уменьшаем глобальную переменную ThreadCount на 1
+  // РЈРјРµРЅСЊС€Р°РµРј РіР»РѕР±Р°Р»СЊРЅСѓСЋ РїРµСЂРµРјРµРЅРЅСѓСЋ ThreadCount РЅР° 1
   InterlockedDecrement(ThreadCount);
 end;
 
@@ -80,17 +80,17 @@ var
 begin
   FreeOnTerminate := True;
 
-  // Организуем паузу 10 секунд. При этом каждые 20 мс
-  // проверяем флаг StopThreadsFlag
+  // РћСЂРіР°РЅРёР·СѓРµРј РїР°СѓР·Сѓ 10 СЃРµРєСѓРЅРґ. РџСЂРё СЌС‚РѕРј РєР°Р¶РґС‹Рµ 20 РјСЃ
+  // РїСЂРѕРІРµСЂСЏРµРј С„Р»Р°Рі StopThreadsFlag
   ti.Start;
   while ti.ElapsedSeconds < 10 do
   begin
-    // Заканчиваем ожидание, если выставлен флаг StopThreadsFlag
+    // Р—Р°РєР°РЅС‡РёРІР°РµРј РѕР¶РёРґР°РЅРёРµ, РµСЃР»Рё РІС‹СЃС‚Р°РІР»РµРЅ С„Р»Р°Рі StopThreadsFlag
     if StopThreadsFlag then Break;
     Sleep(20);
   end;
 
-  ThreadShowMessageFmt('Работа потока #%d завершена!', [FThreadNum]);
+  ThreadShowMessageFmt('Р Р°Р±РѕС‚Р° РїРѕС‚РѕРєР° #%d Р·Р°РІРµСЂС€РµРЅР°!', [FThreadNum]);
 end;
 
 end.
