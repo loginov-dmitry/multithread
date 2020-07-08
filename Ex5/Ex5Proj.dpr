@@ -4,7 +4,8 @@ uses
   Forms,
   Ex5Unit in 'Ex5Unit.pas' {Form1},
   MTUtils in '..\CommonUtils\MTUtils.pas',
-  TimeIntervals in '..\CommonUtils\TimeIntervals.pas';
+  TimeIntervals in '..\CommonUtils\TimeIntervals.pas',
+  ProgressViewer in '..\CommonUtils\ProgressViewer.pas';
 
 {$R *.res}
 

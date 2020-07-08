@@ -1,9 +1,10 @@
-program Ex4Proj;
+program Ex12FullProj;
 
 uses
   Forms,
-  Ex4Unit in 'Ex4Unit.pas' {Form1},
-  ProgressViewer in '..\CommonUtils\ProgressViewer.pas';
+  Ex12FullUnit in 'Ex12FullUnit.pas' {Form1},
+  MTUtils in '..\CommonUtils\MTUtils.pas',
+  TimeIntervals in '..\CommonUtils\TimeIntervals.pas';
 
 {$R *.res}
 

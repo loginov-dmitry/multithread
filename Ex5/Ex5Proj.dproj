@@ -30,6 +30,7 @@
       <MainSource>MainSource</MainSource>
     </DelphiCompile>
     <DCCReference Include="..\CommonUtils\MTUtils.pas" />
+    <DCCReference Include="..\CommonUtils\ProgressViewer.pas" />
     <DCCReference Include="..\CommonUtils\TimeIntervals.pas" />
     <DCCReference Include="Ex5Unit.pas">
       <Form>Form1</Form>
