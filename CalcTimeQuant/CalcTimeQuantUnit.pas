@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, ExtCtrls;
+  Dialogs, StdCtrls, ExtCtrls, CheckLst;
 
 type
   TCalcQuantThread = class(TThread)
@@ -24,7 +24,7 @@ type
     LoopCount: Integer;           // Количество циклов
     WorkList: array of Double;    // Длительность выделенных квантов времени
     NotWorkList: array of Double; // Длительность интервалов простоя
-    constructor Create(ThreadNum: Integer);
+    constructor Create(ThreadNum: Integer; AffinityMask: DWORD; APriority: TThreadPriority);
   end;
 
   TForm1 = class(TForm)
@@ -35,6 +35,9 @@ type
     Label3: TLabel;
     Memo1: TMemo;
     Timer1: TTimer;
+    Label4: TLabel;
+    clbCPUList: TCheckListBox;
+    cbUseDiffPriority: TCheckBox;
     procedure btnStartThreadsClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -42,6 +45,7 @@ type
   private
     { Private declarations }
     FList: TList; // Список запущенных потоков
+    function GetAffinityMask: DWORD;
   public
     { Public declarations }
   end;
@@ -56,17 +60,36 @@ implementation
 procedure TForm1.btnStartThreadsClick(Sender: TObject);
 var
   I: Integer;
+  APriority: TThreadPriority;
 begin
   Memo1.Clear;
+  //APriority := tpNormal;
+  APriority := tpHigher;
   for I := 1 to StrToInt(edThreadCount.Text) do
-    FList.Add(TCalcQuantThread.Create(I));
+  begin
+    if cbUseDiffPriority.Checked and (I > 1) then
+    begin
+      if APriority > tpIdle then
+        Dec(APriority);
+    end;
+      
+    FList.Add(TCalcQuantThread.Create(I, GetAffinityMask, APriority));
+  end;
   btnStartThreads.Enabled := False;
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
+var
+  Info: SYSTEM_INFO;
+  I: Integer;
 begin
   FList := TList.Create;
   DecimalSeparator := '.';
+
+  GetSystemInfo(Info);
+  for I := 1 to Info.dwNumberOfProcessors do
+    clbCPUList.Items.Add('cpu #' + IntToStr(I));
+  clbCPUList.Checked[0] := True;
 end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
@@ -76,6 +99,16 @@ begin
   for I := 0 to FList.Count - 1 do
     TCalcQuantThread(FList[I]).Free;
   FList.Free;
+end;
+
+function TForm1.GetAffinityMask: DWORD;
+var
+  I: Integer;
+begin
+  Result := 0;
+  for I := 0 to clbCPUList.Count - 1 do
+    if clbCPUList.Checked[I] then
+      Result := Result or (1 shl I);
 end;
 
 procedure TForm1.Timer1Timer(Sender: TObject);
@@ -125,10 +158,14 @@ begin
   WorkAll := WorkAll + WorkTime;
 end;
 
-constructor TCalcQuantThread.Create(ThreadNum: Integer);
+constructor TCalcQuantThread.Create(ThreadNum: Integer; AffinityMask: DWORD;
+  APriority: TThreadPriority);
 begin
   inherited Create(False);
   Self.ThreadNum := ThreadNum;
+  if AffinityMask > 0 then
+    SetThreadAffinityMask(Self.Handle, AffinityMask);
+  Priority := APriority;
 end;
 
 procedure TCalcQuantThread.Execute;
@@ -141,7 +178,7 @@ begin
   QueryPerformanceCounter(StartTicks);
   PrevTicks := StartTicks;
   CurQuantStart := StartTicks;
-  BreakDiff := 5 * Freq;
+  BreakDiff := 10 * Freq;
   QuantDiff := Round(0.001 * Freq);
   CurQuantTime := 0;
   repeat
