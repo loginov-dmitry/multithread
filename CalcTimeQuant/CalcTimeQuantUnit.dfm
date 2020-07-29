@@ -5,7 +5,7 @@ object Form1: TForm1
     #1055#1088#1086#1075#1088#1072#1084#1084#1072' '#1076#1083#1103' '#1086#1087#1088#1077#1076#1077#1083#1077#1085#1080#1103' '#1076#1083#1080#1090#1077#1083#1100#1085#1086#1089#1090#1080' '#1074#1099#1076#1077#1083#1103#1077#1084#1099#1093' '#1082#1074#1072#1085#1090#1086#1074' '#1074#1088#1077#1084#1077#1085 +
     #1080
   ClientHeight = 434
-  ClientWidth = 646
+  ClientWidth = 730
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -16,7 +16,7 @@ object Form1: TForm1
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   DesignSize = (
-    646
+    730
     434)
   PixelsPerInch = 96
   TextHeight = 19
@@ -58,6 +58,13 @@ object Form1: TForm1
     Height = 19
     Caption = #1055#1088#1080#1074#1103#1079#1072#1090#1100' '#1082' '#1103#1076#1088#1091' CPU:'
   end
+  object Label5: TLabel
+    Left = 296
+    Top = 83
+    Width = 206
+    Height = 19
+    Caption = #1055#1088#1080#1086#1088#1080#1090#1077#1090' '#1087#1077#1088#1074#1086#1075#1086' '#1087#1086#1090#1086#1082#1072':'
+  end
   object edThreadCount: TEdit
     Left = 192
     Top = 52
@@ -68,7 +75,7 @@ object Form1: TForm1
   end
   object btnStartThreads: TButton
     Left = 304
-    Top = 103
+    Top = 110
     Width = 297
     Height = 41
     Caption = #1047#1072#1087#1091#1089#1090#1080#1090#1100' '#1087#1086#1090#1086#1082#1080' '#1085#1072' 10 '#1089#1077#1082#1091#1085#1076
@@ -78,11 +85,12 @@ object Form1: TForm1
   object Memo1: TMemo
     Left = 8
     Top = 167
-    Width = 630
+    Width = 714
     Height = 259
     Anchors = [akLeft, akTop, akRight, akBottom]
     ScrollBars = ssVertical
     TabOrder = 2
+    ExplicitWidth = 630
   end
   object clbCPUList: TCheckListBox
     Left = 192
@@ -99,6 +107,25 @@ object Form1: TForm1
     Height = 17
     Caption = #1048#1089#1087#1086#1083#1100#1079#1086#1074#1072#1090#1100' '#1088#1072#1079#1085#1099#1077' '#1087#1088#1080#1086#1088#1080#1090#1077#1090#1099
     TabOrder = 4
+  end
+  object cbPriority: TComboBox
+    Left = 506
+    Top = 80
+    Width = 216
+    Height = 27
+    Style = csDropDownList
+    ItemHeight = 19
+    ItemIndex = 3
+    TabOrder = 5
+    Text = 'tpNormal '
+    Items.Strings = (
+      'tpIdle '
+      'tpLowest '
+      'tpLower '
+      'tpNormal '
+      'tpHigher '
+      'tpHighest'
+      'tpTimeCritical')
   end
   object Timer1: TTimer
     Interval = 500

@@ -38,6 +38,8 @@ type
     Label4: TLabel;
     clbCPUList: TCheckListBox;
     cbUseDiffPriority: TCheckBox;
+    Label5: TLabel;
+    cbPriority: TComboBox;
     procedure btnStartThreadsClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -63,8 +65,8 @@ var
   APriority: TThreadPriority;
 begin
   Memo1.Clear;
-  //APriority := tpNormal;
-  APriority := tpHigher;
+
+  APriority := TThreadPriority(cbPriority.ItemIndex);
   for I := 1 to StrToInt(edThreadCount.Text) do
   begin
     if cbUseDiffPriority.Checked and (I > 1) then
