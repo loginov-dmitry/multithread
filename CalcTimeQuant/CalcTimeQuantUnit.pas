@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, ExtCtrls, CheckLst;
+  Dialogs, StdCtrls, ExtCtrls, CheckLst, MMSystem;
 
 type
   TCalcQuantThread = class(TThread)
@@ -40,10 +40,14 @@ type
     cbUseDiffPriority: TCheckBox;
     Label5: TLabel;
     cbPriority: TComboBox;
+    Label6: TLabel;
+    edSysTimerInterval: TEdit;
+    btnChangeSysTimerInterval: TButton;
     procedure btnStartThreadsClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
+    procedure btnChangeSysTimerIntervalClick(Sender: TObject);
   private
     { Private declarations }
     FList: TList; // Список запущенных потоков
@@ -58,6 +62,26 @@ var
 implementation
 
 {$R *.dfm}
+
+procedure TForm1.btnChangeSysTimerIntervalClick(Sender: TObject);
+var
+  NewInterval, Res: Cardinal;
+begin
+  // У меня не получилось изменить разрешение таймера. Видимо, другая программа
+  // уже вызвала timeBeginPeriod. Windows в этом случае игнорирует
+  // вызовы timeBeginPeriod от других программ, если мы указываем больший интервал.
+  {
+  This function affects a global Windows setting. Windows uses the lowest value
+   (that is, highest resolution) requested by any process. Setting a higher
+   resolution can improve the accuracy of time-out intervals in wait functions.
+   However, it can also reduce overall system performance, because the thread
+   scheduler switches tasks more often.
+  }
+  NewInterval := StrToInt(edSysTimerInterval.Text);
+  Res := timeBeginPeriod(NewInterval);
+  if Res = TIMERR_NOCANDO then
+    raise Exception.Create('Задано недопустимое разрешение таймера!');
+end;
 
 procedure TForm1.btnStartThreadsClick(Sender: TObject);
 var
