@@ -82,8 +82,11 @@ var
 begin
   // Определяем, есть ли элементы в списке EventList
   L := EventList.LockList;
-  Cnt := L.Count;
-  EventList.UnlockList;
+  try
+    Cnt := L.Count;
+  finally
+    EventList.UnlockList;
+  end;
 
   if Cnt = 0 then Exit;
 
