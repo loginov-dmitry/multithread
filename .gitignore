@@ -2,3 +2,7 @@
 *.dcu
 *.local
 *.identcache
+__history
+*.exe
+*.log
+*.zip

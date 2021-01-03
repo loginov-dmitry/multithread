@@ -67,9 +67,10 @@ procedure TForm1.btnChangeSysTimerIntervalClick(Sender: TObject);
 var
   NewInterval, Res: Cardinal;
 begin
-  // У меня не получилось изменить разрешение таймера. Видимо, другая программа
-  // уже вызвала timeBeginPeriod. Windows в этом случае игнорирует
-  // вызовы timeBeginPeriod от других программ, если мы указываем больший интервал.
+  {Внимание! Перед изменением разрешения системного таймера проверьте его текущее
+   разрешение с помощью утилиты Clockres.exe, её можно скачать с сайта Microsoft.
+   Также желательно закрыть Delphi, т.к. она может принудительно выставлять
+   разрешение в 1 мс. Браузеры также могут менять разрешение!}
   {
   This function affects a global Windows setting. Windows uses the lowest value
    (that is, highest resolution) requested by any process. Setting a higher

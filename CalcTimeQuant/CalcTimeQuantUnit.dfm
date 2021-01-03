@@ -4,7 +4,7 @@ object Form1: TForm1
   Caption = 
     #1055#1088#1086#1075#1088#1072#1084#1084#1072' '#1076#1083#1103' '#1086#1087#1088#1077#1076#1077#1083#1077#1085#1080#1103' '#1076#1083#1080#1090#1077#1083#1100#1085#1086#1089#1090#1080' '#1074#1099#1076#1077#1083#1103#1077#1084#1099#1093' '#1082#1074#1072#1085#1090#1086#1074' '#1074#1088#1077#1084#1077#1085 +
     #1080
-  ClientHeight = 492
+  ClientHeight = 490
   ClientWidth = 730
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -17,7 +17,7 @@ object Form1: TForm1
   OnDestroy = FormDestroy
   DesignSize = (
     730
-    492)
+    490)
   PixelsPerInch = 96
   TextHeight = 19
   object Label1: TLabel
@@ -52,7 +52,7 @@ object Form1: TForm1
     Caption = #1056#1077#1079#1091#1083#1100#1090#1072#1090#1099':'
   end
   object Label4: TLabel
-    Left = 9
+    Left = 3
     Top = 89
     Width = 169
     Height = 19
@@ -70,6 +70,7 @@ object Form1: TForm1
     Top = 464
     Width = 348
     Height = 19
+    Anchors = [akLeft]
     Caption = #1048#1079#1084#1077#1085#1080#1090#1100' '#1088#1072#1079#1088#1077#1096#1077#1085#1080#1077' '#1089#1080#1089#1090#1077#1084#1085#1086#1075#1086' '#1090#1072#1081#1084#1077#1088#1072', '#1084#1089':'
   end
   object edThreadCount: TEdit
@@ -93,16 +94,16 @@ object Form1: TForm1
     Left = 8
     Top = 167
     Width = 714
-    Height = 290
+    Height = 288
     Anchors = [akLeft, akTop, akRight, akBottom]
     ScrollBars = ssVertical
     TabOrder = 2
   end
   object clbCPUList: TCheckListBox
-    Left = 192
+    Left = 179
     Top = 89
-    Width = 81
-    Height = 55
+    Width = 104
+    Height = 71
     ItemHeight = 19
     TabOrder = 3
   end
@@ -135,17 +136,19 @@ object Form1: TForm1
   end
   object edSysTimerInterval: TEdit
     Left = 367
-    Top = 463
+    Top = 461
     Width = 42
     Height = 27
+    Anchors = [akLeft, akBottom]
     TabOrder = 6
     Text = '16'
   end
   object btnChangeSysTimerInterval: TButton
     Left = 424
-    Top = 464
+    Top = 462
     Width = 105
     Height = 25
+    Anchors = [akLeft, akBottom]
     Caption = #1048#1079#1084#1077#1085#1080#1090#1100
     TabOrder = 7
     OnClick = btnChangeSysTimerIntervalClick
