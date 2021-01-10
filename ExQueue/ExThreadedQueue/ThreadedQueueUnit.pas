@@ -13,16 +13,30 @@ Consumer-поток выполняет команды и возвращает о
 
 Обратите внимание, что при нажатии кнопок "Запросить состояние" и "Запросить данные"
 программа сообщает время выполнения методов PushItem и PopItem в микросекундах.
-Вызов метода PushItem занимает от 2х до 4х микросекунд.
-Вызов метода PopItem занимает от 22 до 100 микросекунд (в среднем 80 мкс).
+Вызов метода PushItem занимает от 2х до 4х микросекунд (в момент вызова работа
+потока не прерывается, иначе замер показал бы значительно большее время).
+Вызов метода PopItem занимает от 27 до 100 микросекунд (в среднем 85 мкс).
 Это время складывается из:
   1) Consumer-поток ожидает на вызове ConsumerQueue.PopItem
-  2) Consumer-поток кладёт результат в очередь ResQueue
-  3) Producer-поток ожидает на вызове ResQueue.PopItem
-В лучшем случае три переключения между Producer-потоком и Consumer-потоком выполняются
-в рамках одного ядра CPU (в этом случае достигается максимальная скорость: 22 мкс).
+  2) Consumer-поток выполняет некоторый код (готовит результат)
+  3) Consumer-поток кладёт результат в очередь ResQueue
+  4) Producer-поток ожидает на вызове ResQueue.PopItem
+В лучшем случае 2 переключения контекста между Producer-потоком и Consumer-потоком выполняются
+в рамках одного ядра CPU (в этом случае достигается максимальная скорость: 27 мкс).
 Если при переключении между Producer-потоком и Consumer-потоком используются разные
 ядра CPU, то скорость будет ниже (до 100 мкс).
+
+Типовой расклад по времени переключения контекста между потоками:
+  - ConsumerQueue.PushItem:[35 мкс];
+  - Process command:[13 мкс];
+  - ResQueue.PushItem:[42 мкс];
+
+Это означает, что после помещения команды в очередь время разблокировки
+Consumer-потока (вызов ConsumerQueue.PopItem) составило 35 мкс (min=7, max=57).
+Затем был выполнен некоторый код (подготовка результата) в TConsumerThread.Execute (13 мкс).
+Затем Consumer-поток добавил результат в очередь ResQueue и
+Producer-поток был разблокирован (вызов ResQueue.PopItem) в
+течение 42 мкс (min=7, max=57).
 
 Информацию о ходе своей работы потоки пишут в лог-файл.
 
@@ -57,10 +71,13 @@ type
     ResStr: string;
   end;
 
+  PTimeIntervalEvents = ^TTimeIntervalEvents;
+
   TQueueCommand = record
     CmdId: Integer;    // Команда, которую должен исполнить поток-consumer
     //CmpParams: Variant; // При необходимости у команды могут быть доп. параметры
     ResQueue: TThreadedQueue<TQueueResult>; // Очередь, куда будет отправляться результат
+    pTimeEvents: PTimeIntervalEvents;
   end;
 
   TProducerType = (
@@ -129,7 +146,7 @@ var
   Cmd: TQueueCommand;
   Res: TQueueResult;
   ResQueue: TThreadedQueue<TQueueResult>;
-  tmEv: TTimeIntervalEvents;
+  tmEv, tmEvSwitch: TTimeIntervalEvents;
   QSize: Integer;
 begin
   ResQueue := TThreadedQueue<TQueueResult>.Create(10);
@@ -138,13 +155,18 @@ begin
   else
     Cmd.CmdId := Q_CMD_GET_LAST_DATA;
   Cmd.ResQueue := ResQueue;
-  tmEv.StartEvent('PushItem'); // Замер времени
-  ConsumerThread.ConsumerQueue.PushItem(Cmd, QSize); // Уходит от 2х до 4х мкс
-  tmEv.StartEvent('PopItem');  // Замер времени
-  Res := ResQueue.PopItem;                           // Уходит от 30 до 100 мкс
-  tmEv.StopEvent();
-  ShowMessageFmt('Consumer-поток вернул данные: %s. Ушло времени: %s; Длина очереди: %d',
-    [Res.ResStr, tmEv.GetEventsAsString([eoUseMicroSec]), QSize]);
+  Cmd.pTimeEvents := @tmEvSwitch;                  // Для замера времени
+  tmEv.StartEvent('PushItem');                     // Замер времени
+  tmEvSwitch.StartEvent('ConsumerQueue.PushItem'); // Замер времени
+  ConsumerThread.ConsumerQueue.PushItem(Cmd, QSize);
+  tmEv.StartEvent('PopItem');                      // Замер времени
+  Res := ResQueue.PopItem;
+  tmEv.StopEvent();                                // Замер времени
+  tmEvSwitch.StopEvent();                          // Замер времени
+  ShowMessageFmt('Consumer-поток вернул данные: %s. Ушло времени: %s; '+
+    'Время переключения контекста: %s; Длина очереди: %d',
+    [Res.ResStr, tmEv.GetEventsAsString([eoUseMicroSec]),
+    tmEvSwitch.GetEventsAsString([eoUseMicroSec]), QSize]);
   ResQueue.Free;
 end;
 
@@ -259,6 +281,8 @@ begin
   while True do
   begin
     Cmd := ConsumerQueue.PopItem;
+    if Assigned(Cmd.pTimeEvents) then Cmd.pTimeEvents.StartEvent('Process command'); // Замер времени
+
     DefLogger.AddToLog('TConsumerThread: принята команда CmdId=' + IntToStr(Cmd.CmdId));
     case Cmd.CmdId of
       Q_CMD_STOP_THREAD: Break; // Завершили работу потока
@@ -272,6 +296,7 @@ begin
         end;
     end;
     // Кладём результат в очередь Producer-потока
+    if Assigned(Cmd.pTimeEvents) then Cmd.pTimeEvents.StartEvent('ResQueue.PushItem'); // Замер времени
     Cmd.ResQueue.PushItem(Res);
     DefLogger.AddToLog('TConsumerThread: подготовлен ответ: ResStr=' + Res.ResStr);
   end;
