@@ -11,6 +11,19 @@
 Consumer-потока путём нажатия соответствующей кнопки на форме.
 Consumer-поток выполняет команды и возвращает ответ немедленно!
 
+Обратите внимание, что при нажатии кнопок "Запросить состояние" и "Запросить данные"
+программа сообщает время выполнения методов PushItem и PopItem в микросекундах.
+Вызов метода PushItem занимает от 2х до 4х микросекунд.
+Вызов метода PopItem занимает от 22 до 100 микросекунд (в среднем 80 мкс).
+Это время складывается из:
+  1) Consumer-поток ожидает на вызове ConsumerQueue.PopItem
+  2) Consumer-поток кладёт результат в очередь ResQueue
+  3) Producer-поток ожидает на вызове ResQueue.PopItem
+В лучшем случае три переключения между Producer-потоком и Consumer-потоком выполняются
+в рамках одного ядра CPU (в этом случае достигается максимальная скорость: 22 мкс).
+Если при переключении между Producer-потоком и Consumer-потоком используются разные
+ядра CPU, то скорость будет ниже (до 100 мкс).
+
 Информацию о ходе своей работы потоки пишут в лог-файл.
 
 Другие примеры использования очереди заданий:
@@ -31,7 +44,8 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, System.Generics.Collections, MTLogger, MTUtils;
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, System.Generics.Collections, MTLogger,
+  MTUtils, TimeIntervals;
 
 const
   Q_CMD_STOP_THREAD = 0;
@@ -115,6 +129,8 @@ var
   Cmd: TQueueCommand;
   Res: TQueueResult;
   ResQueue: TThreadedQueue<TQueueResult>;
+  tmEv: TTimeIntervalEvents;
+  QSize: Integer;
 begin
   ResQueue := TThreadedQueue<TQueueResult>.Create(10);
   if TButton(Sender).Tag = 1 then
@@ -122,9 +138,13 @@ begin
   else
     Cmd.CmdId := Q_CMD_GET_LAST_DATA;
   Cmd.ResQueue := ResQueue;
-  ConsumerThread.ConsumerQueue.PushItem(Cmd);
-  Res := ResQueue.PopItem;
-  ShowMessage('Consumer-поток вернул данные: ' + Res.ResStr);
+  tmEv.StartEvent('PushItem'); // Замер времени
+  ConsumerThread.ConsumerQueue.PushItem(Cmd, QSize); // Уходит от 2х до 4х мкс
+  tmEv.StartEvent('PopItem');  // Замер времени
+  Res := ResQueue.PopItem;                           // Уходит от 30 до 100 мкс
+  tmEv.StopEvent();
+  ShowMessageFmt('Consumer-поток вернул данные: %s. Ушло времени: %s; Длина очереди: %d',
+    [Res.ResStr, tmEv.GetEventsAsString([eoUseMicroSec]), QSize]);
   ResQueue.Free;
 end;
 
