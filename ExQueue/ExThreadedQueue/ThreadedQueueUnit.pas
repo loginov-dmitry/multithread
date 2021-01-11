@@ -231,6 +231,7 @@ var
 begin
   DefLogger.AddToLog('TProducerThread: Поток запущен. ProducerType=' + IntToStr(Integer(FProducerType)));
   Cmd.ResQueue := ResQueue;
+  Cmd.pTimeEvents := nil;
   while not Terminated do
   begin
     if FProducerType = ptQueryCurState then
@@ -267,6 +268,7 @@ var
 begin
   // Для того, чтобы остановить этот поток, необходимо добавить команду в очередь
   Cmd.CmdId := Q_CMD_STOP_THREAD;
+  Cmd.pTimeEvents := nil;
   ConsumerQueue.PushItem(Cmd);
   inherited; // Дожидаемся, когда поток обработает все команды, в том числе Q_CMD_STOP_THREAD
   ConsumerQueue.Free;
