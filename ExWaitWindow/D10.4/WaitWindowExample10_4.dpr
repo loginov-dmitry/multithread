@@ -1,10 +1,11 @@
-program WaitWindowEx10_4;
+program WaitWindowExample10_4;
 
 uses
   Forms,
   MainFrm in '..\MainFrm.pas' {MainForm},
   WaitFrm in '..\WaitFrm.pas' {WaitForm},
-  TimeIntervals in '..\..\CommonUtils\TimeIntervals.pas';
+  TimeIntervals in '..\..\CommonUtils\TimeIntervals.pas',
+  ParamsUtils in '..\..\CommonUtils\ParamsUtils.pas';
 
 {$R *.res}
 

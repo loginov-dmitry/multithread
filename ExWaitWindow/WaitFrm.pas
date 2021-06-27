@@ -24,12 +24,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 }
 
 unit WaitFrm;
-
+    
 interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, ActiveX, ExtCtrls, Buttons, SyncObjs, ComCtrls;
+  Dialogs, StdCtrls, ActiveX, ExtCtrls, Buttons, SyncObjs, ComCtrls, ParamsUtils;
 
 {$IF RTLVersion >= 20.00}
    {$DEFINE D2009PLUS}
@@ -39,6 +39,7 @@ const
   NEED_SHOW_STOP_BTN = True;
   NOT_SHOW_STOP_BTN = False;
   OPERATION_TYPE_NONE = 0;
+  RES_PARAMS_NIL = nil;  
 
 type
   {Интерфейс можно вынести (при необходимости) в отдельный файл. Интерфейсную
@@ -72,11 +73,11 @@ type
   
   {$IFDEF D2009PLUS}
   // Для современных версий Delphi используется механизм анонимных функций.
-  TWorkFunction = reference to function (OperType: Integer; AParams: Variant; var AResParams: Variant; wsi: TWaitStatusInterface): Boolean;
+  TWorkFunction = reference to function (OperType: Integer; AParams: TParamsRec; AResParams: PParamsRec; wsi: TWaitStatusInterface): Boolean;
   {$ELSE}
   // Для старых версий Delphi приходится объявлять отдельно TWorkFunction и TWorkMethod
-  TWorkFunction = function (OperType: Integer; AParams: Variant; var AResParams: Variant; wsi: TWaitStatusInterface): Boolean;
-  TWorkMethod = function (OperType: Integer; AParams: Variant; var AResParams: Variant; wsi: TWaitStatusInterface): Boolean of object;
+  TWorkFunction = function (OperType: Integer; AParams: TParamsRec; AResParams: PParamsRec; wsi: TWaitStatusInterface): Boolean;
+  TWorkMethod = function (OperType: Integer; AParams: TParamsRec; AResParams: PParamsRec; wsi: TWaitStatusInterface): Boolean of object;
   {$ENDIF}
 
   TWaitForm = class(TForm)
@@ -95,7 +96,6 @@ type
     procedure btnStopClick(Sender: TObject);
   private
     AThread: TThread;
-    FResParams: Variant;
     FError: string;
     FIsSuccess: Boolean;
     FStartTime: TDateTime;
@@ -105,14 +105,14 @@ type
     { Public declarations }
   end;
 
-function DoOperationInThread(AOwner: TForm; OperType: Integer; OperationName: string; AParams: Variant;
-  WorkFunc: TWorkFunction; ShowStopButton: Boolean; var AResParams: Variant): Boolean; overload;
+function DoOperationInThread(AOwner: TForm; OperType: Integer; OperationName: string; AParams: TParamsRec;
+  WorkFunc: TWorkFunction; ShowStopButton: Boolean; AResParams: PParamsRec = RES_PARAMS_NIL): Boolean; overload;
 
 {$IFNDEF D2009PLUS}
 // Данный вариант используется только для поддержки старых версий Delphi
-function DoOperationInThread(AOwner: TForm; OperType: Integer; OperationName: string; AParams: Variant;
-  WorkMethod: TWorkMethod; ShowStopButton: Boolean; var AResParams: Variant): Boolean; overload;
-{$ENDIF}
+function DoOperationInThread(AOwner: TForm; OperType: Integer; OperationName: string; AParams: TParamsRec;
+  WorkMethod: TWorkMethod; ShowStopButton: Boolean; AResParams: PParamsRec = RES_PARAMS_NIL): Boolean; overload;
+{$ENDIF} 
 
 implementation
 
@@ -150,7 +150,8 @@ type
 
   TBackgroundOperationsThread = class(TThread)
   public
-    FParams: Variant;
+    FParams: TParamsRec;
+    FResParams: PParamsRec;
     FWorkFunc: TWorkFunction;
     {$IFNDEF D2009PLUS}
     FWorkMethod: TWorkMethod;
@@ -165,18 +166,20 @@ type
   protected
     procedure Execute; override;
   public
-    constructor Create(AParams: Variant; AWorkFunc: TWorkFunction; {$IFNDEF D2009PLUS}AWorkMethod: TWorkMethod; {$ENDIF}
+    constructor Create(AParams: TParamsRec; AResParams: PParamsRec; AWorkFunc: TWorkFunction; {$IFNDEF D2009PLUS}AWorkMethod: TWorkMethod; {$ENDIF}
       AForm: TForm; AStatusInterface: TWaitStatusInterface; OperType: Integer);
     destructor Destroy; override;
   end;
 
-function DoOperationInThreadInternal(AOwner: TForm; OperType: Integer; OperationName: string; AParams: Variant;
-  WorkFunc: TWorkFunction; {$IFNDEF D2009PLUS}WorkMethod: TWorkMethod; {$ENDIF}ShowStopButton: Boolean; var AResParams: Variant): Boolean;
+function DoOperationInThreadInternal(AOwner: TForm; OperType: Integer; OperationName: string; AParams: TParamsRec;
+  WorkFunc: TWorkFunction; {$IFNDEF D2009PLUS}WorkMethod: TWorkMethod; {$ENDIF}ShowStopButton: Boolean; AResParams: PParamsRec): Boolean;
 var
   AForm: TWaitForm;
 begin
   if GetCurrentThreadId <> MainThreadID then
     raise Exception.Create('DoOperationInThreadInternal: Вызов должен происходить из главного потока');
+  if Assigned(AResParams) then
+    AResParams^.Clear;
 
   AForm := TWaitForm.Create(AOwner);
   try
@@ -189,30 +192,29 @@ begin
 
     AForm.FStatusInterface := TWaitStatusControl.Create;
 
-    AForm.AThread := TBackgroundOperationsThread.Create(AParams, WorkFunc, {$IFNDEF D2009PLUS}WorkMethod, {$ENDIF}AForm, AForm.FStatusInterface, OperType);
+    AForm.AThread := TBackgroundOperationsThread.Create(AParams, AResParams, WorkFunc, {$IFNDEF D2009PLUS}WorkMethod, {$ENDIF}AForm, AForm.FStatusInterface, OperType);
     AForm.ShowModal;
 
     if AForm.FError <> '' then
       raise Exception.Create(AForm.FError);
 
     Result     := AForm.FIsSuccess;
-    AResParams := AForm.FResParams;
   finally
     AForm.AThread.Free;
     AForm.Free;
   end;
 end;
 
-function DoOperationInThread(AOwner: TForm; OperType: Integer; OperationName: string; AParams: Variant;
-  WorkFunc: TWorkFunction; ShowStopButton: Boolean; var AResParams: Variant): Boolean;
+function DoOperationInThread(AOwner: TForm; OperType: Integer; OperationName: string; AParams: TParamsRec;
+  WorkFunc: TWorkFunction; ShowStopButton: Boolean; AResParams: PParamsRec = RES_PARAMS_NIL): Boolean;
 begin
   Result := DoOperationInThreadInternal(AOwner, OperType, OperationName, AParams,
     WorkFunc, {$IFNDEF D2009PLUS}nil, {$ENDIF}ShowStopButton, AResParams);
 end;
 
 {$IFNDEF D2009PLUS}
-function DoOperationInThread(AOwner: TForm; OperType: Integer; OperationName: string; AParams: Variant;
-  WorkMethod: TWorkMethod; ShowStopButton: Boolean; var AResParams: Variant): Boolean; overload;
+function DoOperationInThread(AOwner: TForm; OperType: Integer; OperationName: string; AParams: TParamsRec;
+  WorkMethod: TWorkMethod; ShowStopButton: Boolean; AResParams: PParamsRec = RES_PARAMS_NIL): Boolean; overload;
 begin
   Result := DoOperationInThreadInternal(AOwner, OperType, OperationName, AParams,
     nil, WorkMethod, ShowStopButton, AResParams);
@@ -221,7 +223,7 @@ end;
 
 { TBackgroundOperationsThread }
 
-constructor TBackgroundOperationsThread.Create(AParams: Variant;
+constructor TBackgroundOperationsThread.Create(AParams: TParamsRec; AResParams: PParamsRec;
   AWorkFunc: TWorkFunction; {$IFNDEF D2009PLUS}AWorkMethod: TWorkMethod; {$ENDIF}AForm: TForm;
   AStatusInterface: TWaitStatusInterface; OperType: Integer);
 const
@@ -229,8 +231,9 @@ const
   NOT_AUTO_RESET    = TRUE;
 begin
   inherited Create(False);
-  FParams   := AParams;
-  FWorkFunc := AWorkFunc;
+  FParams    := AParams;
+  FResParams := AResParams;
+  FWorkFunc  := AWorkFunc;
   {$IFNDEF D2009PLUS}
   FWorkMethod := AWorkMethod;
   {$ENDIF}
@@ -253,10 +256,10 @@ begin
     CoInitialize(nil);
     try
       if Assigned(FWorkFunc) then
-        TWaitForm(FForm).FIsSuccess := FWorkFunc(FOperType, FParams, TWaitForm(FForm).FResParams, TWaitForm(FForm).FStatusInterface)
+        TWaitForm(FForm).FIsSuccess := FWorkFunc(FOperType, FParams, FResParams, TWaitForm(FForm).FStatusInterface)
       {$IFNDEF D2009PLUS}
       else if Assigned(FWorkMethod) then
-        TWaitForm(FForm).FIsSuccess := FWorkMethod(FOperType, FParams, TWaitForm(FForm).FResParams, TWaitForm(FForm).FStatusInterface)
+        TWaitForm(FForm).FIsSuccess := FWorkMethod(FOperType, FParams, FResParams, TWaitForm(FForm).FStatusInterface)
       {$ENDIF}
     finally
       CoUnInitialize();
@@ -296,6 +299,8 @@ begin
 end;
 
 procedure TWaitForm.Timer1Timer(Sender: TObject);
+var
+  AMin, AMax: Integer;
 begin
   lbTime.Caption := FormatDateTime('nn:ss', Now - FStartTime);
   if FStatusInterface.OperationName <> '' then
@@ -303,8 +308,16 @@ begin
   labOperationName.Left := (Width - labOperationName.Width) div 2;
   labWaitStatus.Caption := FStatusInterface.StatusText;
   ProgressBar1.Visible := FStatusInterface.ProgressPosition > 0;
-  ProgressBar1.Min := FStatusInterface.GetProgressMin;
-  ProgressBar1.Max := FStatusInterface.GetProgressMax;
+
+  AMin := FStatusInterface.GetProgressMin();
+  AMax := FStatusInterface.GetProgressMax();
+  if (ProgressBar1.Min <> AMin) or (ProgressBar1.Max <> AMax) then
+  begin
+    if AMax <= AMin then AMax := AMin + 1;
+    ProgressBar1.Max := MaxInt;
+    ProgressBar1.Min := AMin;
+    ProgressBar1.Max := AMax;
+  end;
   ProgressBar1.Position := Round(FStatusInterface.ProgressPosition);
 end;
 
