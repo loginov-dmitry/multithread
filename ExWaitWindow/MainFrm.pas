@@ -52,13 +52,13 @@ type
     procedure FormCreate(Sender: TObject);
   private
     function PrintKKMCheck(OperType: Integer; par: TParamsRec; AResParams: PParamsRec;
-      wsi: TWaitStatusInterface): Boolean;
+      wsi: IWaitStatusInterface): Boolean;
     { Private declarations }
   public
     { Public declarations }
   end;
 
-function BankOperation(OperType: Integer; AParams: TParamsRec; AResParams: PParamsRec; wsi: TWaitStatusInterface): Boolean;
+function BankOperation(OperType: Integer; AParams: TParamsRec; AResParams: PParamsRec; wsi: IWaitStatusInterface): Boolean;
 
 var
   MainForm: TMainForm;
@@ -67,7 +67,7 @@ implementation
 
 {$R *.dfm}
 
-function BankOperation(OperType: Integer; AParams: TParamsRec; AResParams: PParamsRec; wsi: TWaitStatusInterface): Boolean;
+function BankOperation(OperType: Integer; AParams: TParamsRec; AResParams: PParamsRec; wsi: IWaitStatusInterface): Boolean;
 begin
   wsi.StatusLine[1] := 'Вставьте/приложите карту';
   Sleep(2000);
@@ -99,13 +99,13 @@ begin
   begin
     AResParams.SetParam('CardNum', 'VISA****8077');
     AResParams.SetParam('OperTime', Now);
-    //AResParams.AddParams(['CardNum', 'VISA****8077']);
-    //AResParams.AddParams(['OperTime', Now]);
+    //AResParams.SetParams(['CardNum', 'VISA****8077']);
+    //AResParams.SetParams(['OperTime', Now]);
   end;
   Result := True;
 end;
 
-function SaveTransactionInDB(OperType: Integer; par: TParamsRec; AResParams: PParamsRec; wsi: TWaitStatusInterface): Boolean;
+function SaveTransactionInDB(OperType: Integer; par: TParamsRec; AResParams: PParamsRec; wsi: IWaitStatusInterface): Boolean;
 begin
   wsi.StatusLine[1] := Format('Товар: %s; %fр.; Карта: %s', [par.S('TovarName'), par.C('Summa'), par.S('CardNum')]);
   if par.HasParam('OperTime') then
@@ -114,7 +114,7 @@ begin
   Result := True;
 end;
 
-function FastOperation(OperType: Integer; AParams: TParamsRec; AResParams: PParamsRec; wsi: TWaitStatusInterface): Boolean;
+function FastOperation(OperType: Integer; AParams: TParamsRec; AResParams: PParamsRec; wsi: IWaitStatusInterface): Boolean;
 begin
   Result := True;
 end;
@@ -127,7 +127,7 @@ begin
   {$IFDEF D2009PLUS}
   // Демонстрация использования анонимной функции
   DoOperationInThread(Self, OPERATION_TYPE_NONE, 'Быстрая операция', ParamsEmpty,
-    function (OperType: Integer; par: TParamsRec; AResParams: PParamsRec; wsi: TWaitStatusInterface): Boolean
+    function (OperType: Integer; par: TParamsRec; AResParams: PParamsRec; wsi: IWaitStatusInterface): Boolean
     begin
       Result := True;
     end, NOT_SHOW_STOP_BTN);
@@ -137,7 +137,7 @@ begin
   ShowMessageFmt('Время выполнения операции: %d мс', [ti.ElapsedMilliseconds]);
 end;
 
-function ProgressOperation(OperType: Integer; par: TParamsRec; AResParams: PParamsRec; wsi: TWaitStatusInterface): Boolean;
+function ProgressOperation(OperType: Integer; par: TParamsRec; AResParams: PParamsRec; wsi: IWaitStatusInterface): Boolean;
 var
   I: Integer;
 begin
@@ -165,7 +165,7 @@ begin
   ReportMemoryLeaksOnShutdown := True;
 end;
 
-function TMainForm.PrintKKMCheck(OperType: Integer; par: TParamsRec; AResParams: PParamsRec; wsi: TWaitStatusInterface): Boolean;
+function TMainForm.PrintKKMCheck(OperType: Integer; par: TParamsRec; AResParams: PParamsRec; wsi: IWaitStatusInterface): Boolean;
 begin
   wsi.StatusLine[1] := Format('Товар: %s; %fр.; Карта: %s', [par.S('TovarName'), par.C('Summa'), par.S('CardNum')]);
   Sleep(2000);
@@ -188,7 +188,8 @@ begin
     TParamsRec.Build(['Summa', Summa]), BankOperation, NEED_SHOW_STOP_BTN, @ResParams) then
   begin
     CardNum := ResParams.S('CardNum');
-    par.AddParams(['TovarName', TovarName, 'Summa', Summa, 'PayType', PayType, 'CardNum', CardNum, 'OperTime', ResParams.DT('OperTime')]);
+    par.SetParams(['TovarName', TovarName, 'Summa', Summa, 'PayType', PayType, 'CardNum', CardNum, 'OperTime', ResParams.DT('OperTime')]);
+    //par.SetParamsFromVariant(VarArrayOf(['TovarName', TovarName, 'Summa', Summa, 'PayType', PayType, 'CardNum', CardNum, 'OperTime', ResParams.DT('OperTime')]));
     DoOperationInThread(Self, OPERATION_TYPE_NONE, 'Сохранение транзакции в БД', par, SaveTransactionInDB,  NOT_SHOW_STOP_BTN);
     DoOperationInThread(Self, OPERATION_TYPE_NONE, 'Печать чека ККМ', par, PrintKKMCheck, NOT_SHOW_STOP_BTN);
   end;

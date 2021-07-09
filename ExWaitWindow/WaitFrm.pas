@@ -45,7 +45,7 @@ type
   {Интерфейс можно вынести (при необходимости) в отдельный файл. Интерфейсную
    ссылку можно передавать в DLL. IID не указан, т.к. технология COM здесь не
    используется }
-  TWaitStatusInterface = interface
+  IWaitStatusInterface = interface
     // private
     function GetOperationName: string;
     procedure SetOperationName(const Value: string);
@@ -73,11 +73,11 @@ type
   
   {$IFDEF D2009PLUS}
   // Для современных версий Delphi используется механизм анонимных функций.
-  TWorkFunction = reference to function (OperType: Integer; AParams: TParamsRec; AResParams: PParamsRec; wsi: TWaitStatusInterface): Boolean;
+  TWorkFunction = reference to function (OperType: Integer; AParams: TParamsRec; AResParams: PParamsRec; wsi: IWaitStatusInterface): Boolean;
   {$ELSE}
   // Для старых версий Delphi приходится объявлять отдельно TWorkFunction и TWorkMethod
-  TWorkFunction = function (OperType: Integer; AParams: TParamsRec; AResParams: PParamsRec; wsi: TWaitStatusInterface): Boolean;
-  TWorkMethod = function (OperType: Integer; AParams: TParamsRec; AResParams: PParamsRec; wsi: TWaitStatusInterface): Boolean of object;
+  TWorkFunction = function (OperType: Integer; AParams: TParamsRec; AResParams: PParamsRec; wsi: IWaitStatusInterface): Boolean;
+  TWorkMethod = function (OperType: Integer; AParams: TParamsRec; AResParams: PParamsRec; wsi: IWaitStatusInterface): Boolean of object;
   {$ENDIF}
 
   TWaitForm = class(TForm)
@@ -100,7 +100,7 @@ type
     FIsSuccess: Boolean;
     FStartTime: TDateTime;
     FCanClose: Boolean;
-    FStatusInterface: TWaitStatusInterface;
+    FStatusInterface: IWaitStatusInterface;
   public
     { Public declarations }
   end;
@@ -118,7 +118,7 @@ implementation
 
 {$R *.dfm}
 type
-  TWaitStatusControl = class(TInterfacedObject, TWaitStatusInterface)
+  TWaitStatusControl = class(TInterfacedObject, IWaitStatusInterface)
   private
     FStatusText: TStringList;
     FOperationName: string;
@@ -161,13 +161,13 @@ type
     // Эвент нужен для того, чтобы доп. поток немедленно отреагирован на отображения
     // окна ожидания на экране.
     FEvent: TEvent;
-    FStatusInterface: TWaitStatusInterface;
+    FStatusInterface: IWaitStatusInterface;
     FOperType: Integer;
   protected
     procedure Execute; override;
   public
     constructor Create(AParams: TParamsRec; AResParams: PParamsRec; AWorkFunc: TWorkFunction; {$IFNDEF D2009PLUS}AWorkMethod: TWorkMethod; {$ENDIF}
-      AForm: TForm; AStatusInterface: TWaitStatusInterface; OperType: Integer);
+      AForm: TForm; AStatusInterface: IWaitStatusInterface; OperType: Integer);
     destructor Destroy; override;
   end;
 
@@ -225,7 +225,7 @@ end;
 
 constructor TBackgroundOperationsThread.Create(AParams: TParamsRec; AResParams: PParamsRec;
   AWorkFunc: TWorkFunction; {$IFNDEF D2009PLUS}AWorkMethod: TWorkMethod; {$ENDIF}AForm: TForm;
-  AStatusInterface: TWaitStatusInterface; OperType: Integer);
+  AStatusInterface: IWaitStatusInterface; OperType: Integer);
 const
   STATE_NONSIGNALED = FALSE;
   NOT_AUTO_RESET    = TRUE;
