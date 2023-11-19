@@ -57,11 +57,20 @@ https://github.com/loginov-dmitry/multithread/tree/master/ExWaitWindow
 параметров, а это не самый быстрый способ доступа!
 }
 
+{$IFDEF FPC}
+{$MODE DELPHI}{$H+}{$CODEPAGE UTF8}
+{$ENDIF}
+
 unit ParamsUtils;
 
 interface
 
 uses
+{$IFnDEF FPC}
+  Windows,
+{$ELSE}
+  LCLIntf, LCLType, LMessages,
+{$ENDIF}
   SysUtils, Classes, Variants;
 
 type
@@ -78,7 +87,8 @@ type
     Params: array of TParamDesc;
 
     {Устанавливает значение заданного параметра. Если необходимо установить значения
-     нескольких параметров (с именем), то используйте функцию SetParams}
+     нескольких параметров (с именем), то используйте функцию SetParams.
+     Внимание! Если требуется передать ссылку на объект, то используйте LPARAM(MyObject)}
     procedure SetParam(const ParamName: string; const Value: Variant);
 
     {Записывает указанные параметры (названия и значения) в массив Params. Каждый
@@ -127,6 +137,18 @@ type
       с помощью метода SetParamsFromVariant}
     function ExtractAsVarArray: Variant;
 
+    { Возвращает список наименований и значений параметров в виде массива вариантов.
+      Может использоваться при работе с базой данных, например:
+      AParams := TParamsRec.Build(['ADD_TIME', Now, 'ID', 1]);
+      AParams.SetParam('NAME', 'name of item');
+      if condition then
+        AParams.SetParam('COLOR', clRed);
+      fb.InsertRecordDB(nil, tran, 'MYTABLE', AParams.ExtractAsArrayOfVar); }
+    function ExtractAsArrayOfVar: TParamsVariantArray;
+
+    // Возвращает массив параметров и значений в виде строки.
+    function ExtractAsString(DelimParams: Char = ';'; DelimNameValue: Char = '='): string;
+
     function Count: Integer;
 
     {Возвращает значение параметра (в формате Variant) по его имени.
@@ -144,6 +166,7 @@ type
     function S(const ParamName: string): string; overload;
     function B(const ParamName: string): Boolean; overload;
     function DT(const ParamName: string): TDateTime; overload;
+    function O(const ParamName: string): TObject; overload;
 
     // Группа методов с "DefValue". Если параметр отсутствует, то вернёт DefValue
     function I(const ParamName: string; DefValue: Int64): Int64; overload;
@@ -153,6 +176,7 @@ type
     function S(const ParamName: string; DefValue: string): string; overload;
     function B(const ParamName: string; DefValue: Boolean): Boolean; overload;
     function DT(const ParamName: string; DefValue: TDateTime): TDateTime; overload;
+    function O(const ParamName: string; DefValue: TObject): TObject; overload;
 
     function GetValue(Idx: Integer): Variant; overload;
 
@@ -166,6 +190,7 @@ type
     function S(Idx: Integer): string; overload;
     function B(Idx: Integer): Boolean; overload;
     function DT(Idx: Integer): TDateTime; overload;
+    function O(Idx: Integer): TObject; overload;
 
     // Методы для передачи параметров в функцию DoOperationInThread без объявления
     // переменной TParamsRec
@@ -374,8 +399,11 @@ begin
 
   Idx := GetParamIndex(ParamName);
   if Idx >= 0 then
-    Result := Params[Idx].ParamValue
-  else
+  begin
+    Result := Params[Idx].ParamValue;
+    if VarIsNull(Result) or VarIsEmpty(Result) then
+      Result := DefValue;
+  end else
     Result := DefValue;
 end;
 
@@ -392,6 +420,16 @@ end;
 function TParamsRec.I(Idx: Integer): Int64;
 begin
   Result := GetValue(Idx);
+end;
+
+function TParamsRec.O(const ParamName: string; DefValue: TObject): TObject;
+begin
+  Result := TObject(LPARAM(GetValue(ParamName, LPARAM(DefValue))));
+end;
+
+function TParamsRec.O(const ParamName: string): TObject;
+begin
+  Result := TObject(LPARAM(GetValue(ParamName)));
 end;
 
 function TParamsRec.I(const ParamName: string): Int64;
@@ -443,6 +481,45 @@ end;
 function TParamsRec.DT(const ParamName: string; DefValue: TDateTime): TDateTime;
 begin
   Result := GetValue(ParamName, DefValue);
+end;
+
+function TParamsRec.ExtractAsArrayOfVar: TParamsVariantArray;
+var
+  Idx, I: Integer;
+begin
+  if Count = 0 then
+    Result := nil
+  else
+  begin
+    SetLength(Result, Count * 2);
+    Idx := 0;
+    for I := 0 to High(Params) do
+    begin
+      Result[Idx] := Params[I].ParamName;
+      Inc(Idx);
+      Result[Idx] := Params[I].ParamValue;
+      Inc(Idx);
+    end;
+  end;
+end;
+
+function TParamsRec.ExtractAsString(DelimParams, DelimNameValue: Char): string;
+var
+  pd: TParamDesc;
+  sVal: string;
+begin
+  Result := '';
+  for pd in Params do
+  begin
+    if Result <> '' then Result := Result + DelimParams;
+    try
+      sVal := pd.ParamValue;
+    except
+      on E: Exception do
+        sVal := E.Message;
+    end;
+    Result := Result + pd.ParamName + DelimNameValue + sVal;
+  end;
 end;
 
 function TParamsRec.ExtractAsVarArray: Variant;
@@ -533,6 +610,11 @@ end;
 function TParamsRec.U(Idx: Integer): Cardinal;
 begin
   Result := GetValue(Idx);
+end;
+
+function TParamsRec.O(Idx: Integer): TObject;
+begin
+  Result := TObject(LPARAM(GetValue(Idx)));
 end;
 
 end.

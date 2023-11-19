@@ -23,12 +23,21 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 }
 
+{$IFDEF FPC}
+{$MODE DELPHI}{$H+}{$CODEPAGE UTF8}
+{$ENDIF} 
+
 unit TimeIntervals;
 
 interface
 
 uses
-  Windows, SysUtils, Classes, DateUtils, StrUtils;
+{$IFnDEF FPC}
+  Windows,
+{$ELSE}
+  {$IFDEF WINDOWS}Windows, {$ENDIF}LCLIntf, LCLType, LMessages,
+{$ENDIF}
+  SysUtils, Classes, DateUtils, StrUtils;
 
 type
   { TTimeInterval is designed to accurately measure time,
@@ -120,7 +129,7 @@ var
   GetTickCount64NotSupported: Boolean;
 function InternalGetTickCount64: UInt64;
 begin
-  if (@GetTickCount64Ref = nil) and (not GetTickCount64NotSupported) then // Функция не реализована в WinXP
+  if (@GetTickCount64Ref = nil) and (not GetTickCount64NotSupported) then // Р¤СѓРЅРєС†РёСЏ РЅРµ СЂРµР°Р»РёР·РѕРІР°РЅР° РІ WinXP
   begin
     @GetTickCount64Ref := GetProcAddress(GetModuleHandle('kernel32.dll'), 'GetTickCount64');
     if @GetTickCount64Ref = nil then
