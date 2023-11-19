@@ -4,6 +4,4 @@
 
 Ссылка на учебник: https://github.com/loginov-dmitry/multithread/blob/master/multithread_in_delphi_for_beginners.md
 
-Обсуждение работы ведётся на форуме SQL.ru: https://www.sql.ru/forum/1327144/mnogopotochnoe-programmirovanie-v-delphi-dlya-nachinaushhih
-
-Статься "Особенности многопоточного сетевого программирования в Delphi": https://github.com/loginov-dmitry/multithread/blob/master/multithread_net_programming.md
+Статья "Особенности многопоточного сетевого программирования в Delphi": https://github.com/loginov-dmitry/multithread/blob/master/multithread_net_programming.md
