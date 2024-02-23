@@ -1,4 +1,4 @@
-object WaitForm: TWaitForm
+object LDSWaitForm: TLDSWaitForm
   Left = 0
   Top = 0
   BorderIcons = []

@@ -1,4 +1,8 @@
-﻿{
+﻿{$IFDEF FPC}
+{$MODE DELPHI}{$H+}{$CODEPAGE UTF8}
+{$ENDIF}
+
+{
 Copyright (c) 2021, Loginov Dmitry Sergeevich
 All rights reserved.
 
@@ -23,17 +27,24 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 }
 
-unit WaitFrm;
+unit LDSWaitFrm;
     
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, ActiveX, ExtCtrls, Buttons, SyncObjs, ComCtrls, ParamsUtils;
+{$IFnDEF FPC}
+  Windows, Messages,
+{$ELSE}
+  LCLIntf, LCLType, LMessages,
+{$ENDIF}
+  SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, StdCtrls, {$IfNDef FPC}ActiveX, {$EndIf}ExtCtrls, Buttons, SyncObjs, ComCtrls, ParamsUtils;
 
+{$IFnDEF FPC}
 {$IF RTLVersion >= 20.00}
    {$DEFINE D2009PLUS}
 {$IFEND}
+{$ENDIF}
 
 const
   NEED_SHOW_STOP_BTN = True;
@@ -80,7 +91,7 @@ type
   TWorkMethod = function (OperType: Integer; AParams: TParamsRec; AResParams: PParamsRec; wsi: IWaitStatusInterface): Boolean of object;
   {$ENDIF}
 
-  TWaitForm = class(TForm)
+  TLDSWaitForm = class(TForm)
     Label1: TLabel;
     labOperationName: TLabel;
     Label3: TLabel;
@@ -116,7 +127,12 @@ function DoOperationInThread(AOwner: TForm; OperType: Integer; OperationName: st
 
 implementation
 
-{$R *.dfm}
+{$IFnDEF FPC}
+  {$R *.dfm}
+{$ELSE}
+  {$R *.lfm}
+{$ENDIF}
+
 type
   TWaitStatusControl = class(TInterfacedObject, IWaitStatusInterface)
   private
@@ -174,14 +190,14 @@ type
 function DoOperationInThreadInternal(AOwner: TForm; OperType: Integer; OperationName: string; AParams: TParamsRec;
   WorkFunc: TWorkFunction; {$IFNDEF D2009PLUS}WorkMethod: TWorkMethod; {$ENDIF}ShowStopButton: Boolean; AResParams: PParamsRec): Boolean;
 var
-  AForm: TWaitForm;
+  AForm: TLDSWaitForm;
 begin
   if GetCurrentThreadId <> MainThreadID then
     raise Exception.Create('DoOperationInThreadInternal: Вызов должен происходить из главного потока');
   if Assigned(AResParams) then
     AResParams^.Clear;
 
-  AForm := TWaitForm.Create(AOwner);
+  AForm := TLDSWaitForm.Create(AOwner);
   try
     AForm.btnStop.Visible := ShowStopButton;
 
@@ -253,39 +269,39 @@ end;
 procedure TBackgroundOperationsThread.Execute;
 begin
   try
-    CoInitialize(nil);
+    {$IfNDef FPC}CoInitialize(nil){$EndIf};
     try
       if Assigned(FWorkFunc) then
-        TWaitForm(FForm).FIsSuccess := FWorkFunc(FOperType, FParams, FResParams, TWaitForm(FForm).FStatusInterface)
+        TLDSWaitForm(FForm).FIsSuccess := FWorkFunc(FOperType, FParams, FResParams, TLDSWaitForm(FForm).FStatusInterface)
       {$IFNDEF D2009PLUS}
       else if Assigned(FWorkMethod) then
-        TWaitForm(FForm).FIsSuccess := FWorkMethod(FOperType, FParams, FResParams, TWaitForm(FForm).FStatusInterface)
+        TLDSWaitForm(FForm).FIsSuccess := FWorkMethod(FOperType, FParams, FResParams, TLDSWaitForm(FForm).FStatusInterface)
       {$ENDIF}
     finally
-      CoUnInitialize();
+      {$IfNDef FPC}CoUnInitialize(){$EndIf};
     end;
 
   except
     on E: Exception do
-      TWaitForm(FForm).FError := 'Ошибка в потоке: ' + E.Message;
+      TLDSWaitForm(FForm).FError := 'Ошибка в потоке: ' + E.Message;
   end;
 
   // Ожидаем, когда форма появится на экране
   FEvent.WaitFor(INFINITE);
 
   // Выставляем форме разрешение за закрытие
-  TWaitForm(FForm).FCanClose := True;
+  TLDSWaitForm(FForm).FCanClose := True;
 
   // Посылаем форме сообщение о закрытии
-  SendMessage(TWaitForm(FForm).Handle, WM_CLOSE, 0, 0);
+  SendMessage(TLDSWaitForm(FForm).Handle, {$IfDef FPC}LM_CLOSEQUERY{$Else}WM_CLOSE{$EndIf}, 0, 0);
 end;
 
-procedure TWaitForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+procedure TLDSWaitForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
   CanClose := FCanClose;
 end;
 
-procedure TWaitForm.FormShow(Sender: TObject);
+procedure TLDSWaitForm.FormShow(Sender: TObject);
 begin
   FStartTime := Now;
 
@@ -293,12 +309,12 @@ begin
   TBackgroundOperationsThread(AThread).FEvent.SetEvent;
 end;
 
-procedure TWaitForm.btnStopClick(Sender: TObject);
+procedure TLDSWaitForm.btnStopClick(Sender: TObject);
 begin
   FStatusInterface.NeedStop := True;
 end;
 
-procedure TWaitForm.Timer1Timer(Sender: TObject);
+procedure TLDSWaitForm.Timer1Timer(Sender: TObject);
 var
   AMin, AMax: Integer;
 begin

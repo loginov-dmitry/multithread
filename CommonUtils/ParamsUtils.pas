@@ -23,6 +23,10 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 }
 
+{$IFDEF FPC}
+{$MODE DELPHI}{$H+}{$CODEPAGE UTF8}
+{$ENDIF}
+
 {
 Данный модуль был разработан при создании примера WaitWindowExample.
 https://github.com/loginov-dmitry/multithread/tree/master/ExWaitWindow
@@ -57,20 +61,16 @@ https://github.com/loginov-dmitry/multithread/tree/master/ExWaitWindow
 параметров, а это не самый быстрый способ доступа!
 }
 
-{$IFDEF FPC}
-{$MODE DELPHI}{$H+}{$CODEPAGE UTF8}
-{$ENDIF}
-
 unit ParamsUtils;
 
 interface
 
 uses
-{$IFnDEF FPC}
+  {$IFnDEF FPC}
   Windows,
-{$ELSE}
-  LCLIntf, LCLType, LMessages,
-{$ENDIF}
+  {$ELSE}
+  LCLType,
+  {$ENDIF}
   SysUtils, Classes, Variants;
 
 type
@@ -205,6 +205,11 @@ var
   ParamsEmpty: TParamsRec;
 
 implementation
+
+{$IfDef FPC}
+type
+  LPARAM = NativeUInt;
+{$EndIf}
 
 { TParamsRec }
 
@@ -546,6 +551,7 @@ function TParamsRec.ExtractParamNames: TParamsStringArray;
 var
   I: Integer;
 begin
+  Result := nil;
   SetLength(Result, Length(Params));
   for I := 0 to High(Params) do
     Result[I] := Params[I].ParamName;
@@ -555,6 +561,7 @@ function TParamsRec.ExtractParamValues: TParamsVariantArray;
 var
   I: Integer;
 begin
+  Result := nil;
   SetLength(Result, Length(Params));
   for I := 0 to High(Params) do
     Result[I] := Params[I].ParamValue;

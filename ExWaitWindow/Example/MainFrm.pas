@@ -23,17 +23,28 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 }
 
+{$IFDEF FPC}
+{$MODE DELPHI}{$H+}{$CODEPAGE UTF8}
+{$ENDIF}
+
 unit MainFrm;
 
 interface
 
+{$IFnDEF FPC}
 {$IF RTLVersion >= 20.00}
    {$DEFINE D2009PLUS}
 {$IFEND}
+{$ENDIF}
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, ExtCtrls, StdCtrls, WaitFrm, TimeIntervals, ParamsUtils;
+{$IFnDEF FPC}
+  Windows, Messages,
+{$ELSE}
+  LCLIntf, LCLType, LMessages,
+{$ENDIF}
+  SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, ExtCtrls, StdCtrls, LDSWaitFrm, TimeIntervals, ParamsUtils;
 
 type
   TMainForm = class(TForm)
@@ -65,7 +76,11 @@ var
 
 implementation
 
-{$R *.dfm}
+{$IFnDEF FPC}
+  {$R *.dfm}
+{$ELSE}
+  {$R *.lfm}
+{$ENDIF}
 
 function BankOperation(OperType: Integer; AParams: TParamsRec; AResParams: PParamsRec; wsi: IWaitStatusInterface): Boolean;
 begin
@@ -97,8 +112,8 @@ begin
   Sleep(1000);
   if Assigned(AResParams) then
   begin
-    AResParams.SetParam('CardNum', 'VISA****8077');
-    AResParams.SetParam('OperTime', Now);
+    AResParams^.SetParam('CardNum', 'VISA****8077');
+    AResParams^.SetParam('OperTime', Now);
     //AResParams.SetParams(['CardNum', 'VISA****8077']);
     //AResParams.SetParams(['OperTime', Now]);
   end;
@@ -132,7 +147,7 @@ begin
       Result := True;
     end, NOT_SHOW_STOP_BTN);
   {$ELSE}
-  DoOperationInThread(Self, OPERATION_TYPE_NONE, 'Быстрая операция', ParamsEmpty, FastOperation, NOT_SHOW_STOP_BTN);
+  DoOperationInThread(Self, OPERATION_TYPE_NONE, 'Быстрая операция', ParamsEmpty, @FastOperation, NOT_SHOW_STOP_BTN);
   {$ENDIF}
   ShowMessageFmt('Время выполнения операции: %d мс', [ti.ElapsedMilliseconds]);
 end;
@@ -157,12 +172,12 @@ procedure TMainForm.Button3Click(Sender: TObject);
 begin
   DoOperationInThread(Self, OPERATION_TYPE_NONE, 'Длительные вычисления',
     TParamsRec.Build(['Min', 300, 'Max', 700]),
-    ProgressOperation, NEED_SHOW_STOP_BTN);
+    @ProgressOperation, NEED_SHOW_STOP_BTN);
 end;
 
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
-  ReportMemoryLeaksOnShutdown := True;
+  //ReportMemoryLeaksOnShutdown := True;
 end;
 
 function TMainForm.PrintKKMCheck(OperType: Integer; par: TParamsRec; AResParams: PParamsRec; wsi: IWaitStatusInterface): Boolean;
@@ -185,12 +200,12 @@ begin
   Summa := 51.23;
   PayType := 'ByCard';
   if DoOperationInThread(Self, OPERATION_TYPE_NONE, 'Операция с банковской картой',
-    TParamsRec.Build(['Summa', Summa]), BankOperation, NEED_SHOW_STOP_BTN, @ResParams) then
+    TParamsRec.Build(['Summa', Summa]), @BankOperation, NEED_SHOW_STOP_BTN, @ResParams) then
   begin
     CardNum := ResParams.S('CardNum');
     par.SetParams(['TovarName', TovarName, 'Summa', Summa, 'PayType', PayType, 'CardNum', CardNum, 'OperTime', ResParams.DT('OperTime')]);
     //par.SetParamsFromVariant(VarArrayOf(['TovarName', TovarName, 'Summa', Summa, 'PayType', PayType, 'CardNum', CardNum, 'OperTime', ResParams.DT('OperTime')]));
-    DoOperationInThread(Self, OPERATION_TYPE_NONE, 'Сохранение транзакции в БД', par, SaveTransactionInDB,  NOT_SHOW_STOP_BTN);
+    DoOperationInThread(Self, OPERATION_TYPE_NONE, 'Сохранение транзакции в БД', par, @SaveTransactionInDB,  NOT_SHOW_STOP_BTN);
     DoOperationInThread(Self, OPERATION_TYPE_NONE, 'Печать чека ККМ', par, PrintKKMCheck, NOT_SHOW_STOP_BTN);
   end;
 end;

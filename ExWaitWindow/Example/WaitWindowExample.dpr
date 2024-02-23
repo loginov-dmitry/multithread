@@ -1,11 +1,20 @@
+// JCL_DEBUG_EXPERT_GENERATEJDBG OFF
+// JCL_DEBUG_EXPERT_INSERTJDBG OFF
 program WaitWindowExample;
 
 uses
+{$IFDEF FPC}
+  {$IFDEF UNIX}
+  cthreads,
+  {$ENDIF} 
+  Interfaces,
+{$ENDIF}
+
   Forms,
   MainFrm in 'MainFrm.pas' {MainForm},
-  WaitFrm in 'WaitFrm.pas' {WaitForm},
-  TimeIntervals in '..\CommonUtils\TimeIntervals.pas',
-  ParamsUtils in '..\CommonUtils\ParamsUtils.pas';
+  TimeIntervals,
+  ParamsUtils,
+  LDSWaitFrm in '..\LDSWaitFrm.pas' {LDSWaitForm};
 
 {$R *.res}
 

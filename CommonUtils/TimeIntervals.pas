@@ -1,4 +1,4 @@
-{
+﻿{
 Copyright (c) 2020, Loginov Dmitry Sergeevich
 All rights reserved.
 
@@ -23,20 +23,20 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 }
 
+unit TimeIntervals;
+
 {$IFDEF FPC}
 {$MODE DELPHI}{$H+}{$CODEPAGE UTF8}
-{$ENDIF} 
-
-unit TimeIntervals;
+{$ENDIF}
 
 interface
 
 uses
-{$IFnDEF FPC}
-  Windows,
-{$ELSE}
-  {$IFDEF WINDOWS}Windows, {$ENDIF}LCLIntf, LCLType, LMessages,
-{$ENDIF}
+  {$IFnDEF FPC}
+    Windows,
+  {$ELSE}
+    {$IFDEF WINDOWS}Windows, {$ENDIF}LCLIntf, LCLType, {$IfDef LINUX}UnixType, Linux, {$ENDIF}
+  {$ENDIF}
   SysUtils, Classes, DateUtils, StrUtils;
 
 type
@@ -115,15 +115,26 @@ type
     function GetEventsAsString(EvOp: TTimeIntervalGetEventsOptions): string;
   end;
 
+
 var
   PerformanceFrequency: Int64;
+
+  {$IfDef MSWINDOWS}
   UsePerformanceCounter: Boolean;
+  {$EndIf}
 
   // The number of ticks that must be ignored to more accurately measure time intervals
   PerformanceIgnoredTicks: Int64 = 0;
 
 implementation
 
+{$IfDef LINUX}
+const
+  TicksPerMillisecond = 10*1000;
+  TicksPerSecond = TicksPerMillisecond * 1000;
+{$EndIf}
+
+{$IfDef MSWINDOWS}
 var
   GetTickCount64Ref: function: UInt64;
   GetTickCount64NotSupported: Boolean;
@@ -141,6 +152,15 @@ begin
   else
     Result := GetTickCount;
 end;
+{$Else}
+function InternalGetTickCount64: UInt64;
+var
+  res: timespec;
+begin
+  clock_gettime(CLOCK_MONOTONIC, @res);
+  Result:=((TicksPerSecond*res.tv_sec)+res.tv_nsec) div 100;
+end;
+{$EndIf}
 
 { TTimeInterval }
 
@@ -165,9 +185,11 @@ var
 begin
   if FIsRunning then
   begin // If measurements are started, then return the current value
+    {$IfDef MSWINDOWS}
     if UsePerformanceCounter then
       QueryPerformanceCounter(ACounter)
     else
+    {$EndIf}
       ACounter := InternalGetTickCount64;
     Result := ACounter - FStartCounter - PerformanceIgnoredTicks;
     if Result < 0 then
@@ -191,9 +213,11 @@ begin
   FIsRunning    := True;
   FElapsedTicks := 0;
   // Request a counter at the very end of the method
+  {$IfDef MSWINDOWS}
   if UsePerformanceCounter then
     QueryPerformanceCounter(FStartCounter)
   else
+  {$EndIf}
     FStartCounter := InternalGetTickCount64;
 end;
 
@@ -207,9 +231,11 @@ var
   ACounter: Int64;
 begin
   // Request a counter at the very beginning of the method
+  {$IfDef MSWINDOWS}
   if UsePerformanceCounter then
     QueryPerformanceCounter(ACounter)
   else
+  {$EndIf}
     ACounter := InternalGetTickCount64;
 
   FIsRunning := False;
@@ -244,18 +270,25 @@ procedure TTimeIntervalEvent.Start(AName: string);
 begin
   BegDateTime := Now;
   EventName   := AName;
+  {$IfDef MSWINDOWS}
   if UsePerformanceCounter then
     QueryPerformanceCounter(BegCounter)
   else
+  {$EndIf}
     BegCounter := InternalGetTickCount64;
+
+  EndCounter := 0;
 end;
 
 procedure TTimeIntervalEvent.Stop;
 begin
+  {$IfDef MSWINDOWS}
   if UsePerformanceCounter then
     QueryPerformanceCounter(EndCounter)
   else
+  {$EndIf}
     EndCounter := InternalGetTickCount64;
+
   EndCounter := EndCounter - PerformanceIgnoredTicks;
   if EndCounter < BegCounter then
     EndCounter := BegCounter;
@@ -269,16 +302,22 @@ function TTimeIntervalEvents.GetEventsAsString(
 var
   Ev, EvFirst: TTimeIntervalEvent;
   s, sTimeMask: string;
-  I: Integer;
+  I, Cnt: Integer;
   AllTime, AllTicks: Int64;
   Sec: Double;
 begin
   Result := '';
-  if Length(Events) = 0 then
+
+  Cnt := Length(Events);
+
+  if Cnt = 0 then
   begin
     Result := 'Events array is empty';
     Exit;
   end;
+
+  if Events[Cnt - 1].EndCounter = 0 then
+    StopEvent();
 
   if eoWriteDate in EvOp then
     sTimeMask := 'dd.mm.yy hh:nn:ss.zzz'
@@ -360,6 +399,7 @@ begin
     Events[Idx].Stop;
 end;
 
+{$IfDef MSWINDOWS}
 procedure CalcIgnoredPerformanceTicks;
 var
   p1, p2: Int64;
@@ -370,12 +410,17 @@ begin
   // If you do not need adjustment, then just assign:
   // PerformanceIgnoredTicks := 0
 end;
+{$EndIf}
 
 initialization
   // We get the frequency of the high-frequency timer
+  {$IfDef MSWINDOWS}
   UsePerformanceCounter := QueryPerformanceFrequency(PerformanceFrequency);
   if UsePerformanceCounter then
     CalcIgnoredPerformanceTicks
   else
     PerformanceFrequency := 1000; // impossible condition ???
+  {$Else}
+  PerformanceFrequency := TicksPerSecond;
+  {$EndIf}
 end.

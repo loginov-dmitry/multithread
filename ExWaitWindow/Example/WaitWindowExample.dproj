@@ -17,6 +17,10 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <Version>7.0</Version>
     <DCC_Define>DEBUG</DCC_Define>
+    <DCC_UnitSearchPath>$(PTKAZS13)\Library;$(CDELPHI)\Loginov\TimeIntervals</DCC_UnitSearchPath>
+    <DCC_ResourcePath>$(PTKAZS13)\Library;$(CDELPHI)\Loginov\TimeIntervals</DCC_ResourcePath>
+    <DCC_ObjPath>$(PTKAZS13)\Library;$(CDELPHI)\Loginov\TimeIntervals</DCC_ObjPath>
+    <DCC_IncludePath>$(PTKAZS13)\Library;$(CDELPHI)\Loginov\TimeIntervals</DCC_IncludePath>
   </PropertyGroup>
   <ProjectExtensions>
     <Borland.Personality>Delphi.Personality</Borland.Personality>
@@ -29,13 +33,11 @@
     <DelphiCompile Include="WaitWindowExample.dpr">
       <MainSource>MainSource</MainSource>
     </DelphiCompile>
-    <DCCReference Include="..\CommonUtils\ParamsUtils.pas" />
-    <DCCReference Include="..\CommonUtils\TimeIntervals.pas" />
+    <DCCReference Include="..\LDSWaitFrm.pas">
+      <Form>LDSWaitForm</Form>
+    </DCCReference>
     <DCCReference Include="MainFrm.pas">
       <Form>MainForm</Form>
-    </DCCReference>
-    <DCCReference Include="WaitFrm.pas">
-      <Form>WaitForm</Form>
     </DCCReference>
   </ItemGroup>
 </Project>
