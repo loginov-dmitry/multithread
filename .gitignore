@@ -6,3 +6,8 @@ __history
 *.exe
 *.log
 *.zip
+/Ex1/backup
+/Ex1/lib
+*.lps
+/Ex2/backup
+/Ex2/lib
