@@ -1,10 +1,16 @@
-﻿unit Ex8Unit;
+﻿{$IFDEF FPC}{$CODEPAGE UTF8}{$H+}{$MODE DELPHI}{$ENDIF}
+unit Ex8Unit;
 
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, MTUtils, ComCtrls, ExtCtrls, SyncObjs, TimeIntervals;
+  {$IFnDEF FPC}
+    Windows, Messages, 
+  {$ELSE}
+    LCLIntf, LCLType, LMessages, 
+  {$ENDIF}
+    SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, StdCtrls, MTUtils, ComCtrls, 
+    ExtCtrls, SyncObjs, TimeIntervals;
 
 type
   TMyThread = class(TThread)
@@ -52,7 +58,11 @@ var
   Form1: TForm1;
 implementation
 
-{$R *.dfm}
+{$IFnDEF FPC}
+  {$R *.dfm}
+{$ELSE}
+  {$R *.lfm}
+{$ENDIF}
 
 procedure TForm1.btnRunInParallelThreadClick(Sender: TObject);
 var
