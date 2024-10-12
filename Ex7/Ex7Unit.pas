@@ -12,7 +12,7 @@ type
     FResult: Int64;
     FCurrValue: Integer;
     procedure SetProgressParams;
-    procedure SetProgressCurrValue; 
+    procedure SetProgressCurrValue;  
   public
     MaxValue: Integer;
     procedure Execute; override;
