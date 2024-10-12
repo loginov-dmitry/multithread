@@ -1,10 +1,12 @@
-﻿unit Ex1Unit;
+﻿{$IFDEF FPC}{$CODEPAGE UTF8}{$H+}{$MODE DELPHI}{$ENDIF}
+unit Ex1Unit;
 
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls;
+  {$IFDEF MSWINDOWS}Windows, {$ENDIF}
+  {$IFDEF FPC}LCLIntf, LCLType, LMessages, LConvEncoding,{$ENDIF}
+  SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, StdCtrls;
 
 type
   TMyThread = class(TThread)
@@ -28,7 +30,11 @@ var
 
 implementation
 
-{$R *.dfm}
+{$IFnDEF FPC}
+  {$R *.dfm}
+{$ELSE}
+  {$R *.lfm}
+{$ENDIF}
 
 function DoLongCalculations: Int64;
 var
@@ -42,6 +48,7 @@ end;
 
 procedure MyShowMessage(Msg: string);
 begin
+  {$IFDEF FPC}Msg := UTF8ToCP1251(Msg);{$ENDIF}
   Windows.MessageBox(0, PChar(Msg), '', MB_OK);
 end;
 

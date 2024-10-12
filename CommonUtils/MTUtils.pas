@@ -25,10 +25,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 unit MTUtils;
 
+{$IFDEF FPC}{$MODE DELPHI}{$H+}{$CODEPAGE UTF8}{$ENDIF}
+
 interface
 
 uses
-  Windows, SysUtils, Classes, Contnrs, SyncObjs, DateUtils, StrUtils, 
+  {$IFDEF MSWINDOWS}Windows, {$ENDIF}
+  {$IFDEF FPC}LCLIntf, LCLType,{$ENDIF} 
+  SysUtils, Classes, Contnrs, SyncObjs, DateUtils, StrUtils, 
   Math, TimeIntervals;
 
 type

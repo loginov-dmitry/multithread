@@ -1,16 +1,20 @@
+п»ї{$IFDEF FPC}{$MODE DELPHI}{$H+}{$CODEPAGE UTF8}{$ENDIF}
+
 unit MTLogger;
 
 interface
 
 uses
-  Windows, SysUtils, Classes, SyncObjs, MTUtils;
+  {$IFDEF MSWINDOWS}Windows, {$ENDIF}
+  {$IFDEF FPC}LCLIntf, LCLType,{$ENDIF} 
+  SysUtils, Classes, SyncObjs, MTUtils;
 
 type
   TLoggerThread = class(TThread)
   private
     FLogFileName: string;
     Event: TEvent;
-    CritSect: TCriticalSection; // Для защиты списка строк
+    CritSect: TCriticalSection; // Р”Р»СЏ Р·Р°С‰РёС‚С‹ СЃРїРёСЃРєР° СЃС‚СЂРѕРє
     LogStrings: TStringList;
   protected
     procedure Execute; override;
@@ -27,7 +31,7 @@ var
 procedure CreateDefLogger(DefLogFileName: string);
 procedure FreeDefLogger;
 
-// Записывает заданную строку текста в указанный файл
+// Р—Р°РїРёСЃС‹РІР°РµС‚ Р·Р°РґР°РЅРЅСѓСЋ СЃС‚СЂРѕРєСѓ С‚РµРєСЃС‚Р° РІ СѓРєР°Р·Р°РЅРЅС‹Р№ С„Р°Р№Р»
 procedure WriteStringToTextFile(AFileName: string; Msg: string);
 
 implementation
@@ -48,8 +52,8 @@ var
   AFile: TextFile;
 begin
   try
-    // Открываем файл при каждом добавлении строки! При большом объеме записи
-    // в лог файл это очень нерационально!
+    // РћС‚РєСЂС‹РІР°РµРј С„Р°Р№Р» РїСЂРё РєР°Р¶РґРѕРј РґРѕР±Р°РІР»РµРЅРёРё СЃС‚СЂРѕРєРё! РџСЂРё Р±РѕР»СЊС€РѕРј РѕР±СЉРµРјРµ Р·Р°РїРёСЃРё
+    // РІ Р»РѕРі С„Р°Р№Р» СЌС‚Рѕ РѕС‡РµРЅСЊ РЅРµСЂР°С†РёРѕРЅР°Р»СЊРЅРѕ!
     AssignFile(AFile, AFileName);
     if FileExists(AFileName) then
       Append(AFile)
@@ -60,10 +64,10 @@ begin
   except
     on E: Exception do
     begin
-      // Внимание! В реальном приложении выдача пользователю сообщения об ошибке
-      // записи в лог-файл недопустима!
+      // Р’РЅРёРјР°РЅРёРµ! Р’ СЂРµР°Р»СЊРЅРѕРј РїСЂРёР»РѕР¶РµРЅРёРё РІС‹РґР°С‡Р° РїРѕР»СЊР·РѕРІР°С‚РµР»СЋ СЃРѕРѕР±С‰РµРЅРёСЏ РѕР± РѕС€РёР±РєРµ
+      // Р·Р°РїРёСЃРё РІ Р»РѕРі-С„Р°Р№Р» РЅРµРґРѕРїСѓСЃС‚РёРјР°!
       if AllowMessageBoxIfError then
-        ThreadShowMessageFmt('Ошибка при записи в файл [%s] строки "%s": %s', [AFileName, Msg, E.Message]);
+        ThreadShowMessageFmt('РћС€РёР±РєР° РїСЂРё Р·Р°РїРёСЃРё РІ С„Р°Р№Р» [%s] СЃС‚СЂРѕРєРё "%s": %s', [AFileName, Msg, E.Message]);
     end;
   end;
 end;
@@ -89,15 +93,15 @@ const
 begin
   inherited Create(False);
 
-  // Создаём объект "Event" в состоянии "nonsignaled" и просим, чтобы
-  // он автоматически переходил в состояние "nonsignaled" после WaitFor
+  // РЎРѕР·РґР°С‘Рј РѕР±СЉРµРєС‚ "Event" РІ СЃРѕСЃС‚РѕСЏРЅРёРё "nonsignaled" Рё РїСЂРѕСЃРёРј, С‡С‚РѕР±С‹
+  // РѕРЅ Р°РІС‚РѕРјР°С‚РёС‡РµСЃРєРё РїРµСЂРµС…РѕРґРёР» РІ СЃРѕСЃС‚РѕСЏРЅРёРµ "nonsignaled" РїРѕСЃР»Рµ WaitFor
   Event := TEvent.Create(nil, AUTO_RESET, STATE_NONSIGNALED, '', False);
 
-  // Создаём список строк LogStrings
+  // РЎРѕР·РґР°С‘Рј СЃРїРёСЃРѕРє СЃС‚СЂРѕРє LogStrings
   LogStrings := TStringList.Create;
 
-  // Создаём критическую секцию для защиты списка строк от одновременного
-  // доступа из нескольких потоков
+  // РЎРѕР·РґР°С‘Рј РєСЂРёС‚РёС‡РµСЃРєСѓСЋ СЃРµРєС†РёСЋ РґР»СЏ Р·Р°С‰РёС‚С‹ СЃРїРёСЃРєР° СЃС‚СЂРѕРє РѕС‚ РѕРґРЅРѕРІСЂРµРјРµРЅРЅРѕРіРѕ
+  // РґРѕСЃС‚СѓРїР° РёР· РЅРµСЃРєРѕР»СЊРєРёС… РїРѕС‚РѕРєРѕРІ
   CritSect := TCriticalSection.Create;
 
   FLogFileName := LogFileName;
@@ -105,11 +109,11 @@ end;
 
 destructor TLoggerThread.Destroy;
 begin
-  // Очень важно, чтобы вызов Terminate был раньше вызова SetEvent!
-  Terminate;      // 1. Выставляем флаг Terminated
-  Event.SetEvent; // 2. Переводим Event в состояние SIGNALED
-  inherited;      // 3. Дожидаемся выхода из метода Execute
-  Event.Free;     // 4. Уничтожаем объект Event
+  // РћС‡РµРЅСЊ РІР°Р¶РЅРѕ, С‡С‚РѕР±С‹ РІС‹Р·РѕРІ Terminate Р±С‹Р» СЂР°РЅСЊС€Рµ РІС‹Р·РѕРІР° SetEvent!
+  Terminate;      // 1. Р’С‹СЃС‚Р°РІР»СЏРµРј С„Р»Р°Рі Terminated
+  Event.SetEvent; // 2. РџРµСЂРµРІРѕРґРёРј Event РІ СЃРѕСЃС‚РѕСЏРЅРёРµ SIGNALED
+  inherited;      // 3. Р”РѕР¶РёРґР°РµРјСЃСЏ РІС‹С…РѕРґР° РёР· РјРµС‚РѕРґР° Execute
+  Event.Free;     // 4. РЈРЅРёС‡С‚РѕР¶Р°РµРј РѕР±СЉРµРєС‚ Event
   CritSect.Free;
   LogStrings.Free;
 end;
@@ -120,36 +124,36 @@ var
 begin
   while True do
   begin
-    // Завершаем работу потока в том случае, если пользователь выходит из программы,
-    // а поток успел скинуть в лог-файл все сообщения из списка LogStrings
+    // Р—Р°РІРµСЂС€Р°РµРј СЂР°Р±РѕС‚Сѓ РїРѕС‚РѕРєР° РІ С‚РѕРј СЃР»СѓС‡Р°Рµ, РµСЃР»Рё РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ РІС‹С…РѕРґРёС‚ РёР· РїСЂРѕРіСЂР°РјРјС‹,
+    // Р° РїРѕС‚РѕРє СѓСЃРїРµР» СЃРєРёРЅСѓС‚СЊ РІ Р»РѕРі-С„Р°Р№Р» РІСЃРµ СЃРѕРѕР±С‰РµРЅРёСЏ РёР· СЃРїРёСЃРєР° LogStrings
     if Terminated and (LogStrings.Count = 0) then Exit;
 
-    // Ожидаем переключения объекта Event в состояние signaled, но не более 2х секунд
-    // При вызове метода TLoggerThread.AddToLog выполняется вызов Event.SetEvent,
-    // однако лучше перестраховаться и не делать ожидание бесконечным
+    // РћР¶РёРґР°РµРј РїРµСЂРµРєР»СЋС‡РµРЅРёСЏ РѕР±СЉРµРєС‚Р° Event РІ СЃРѕСЃС‚РѕСЏРЅРёРµ signaled, РЅРѕ РЅРµ Р±РѕР»РµРµ 2С… СЃРµРєСѓРЅРґ
+    // РџСЂРё РІС‹Р·РѕРІРµ РјРµС‚РѕРґР° TLoggerThread.AddToLog РІС‹РїРѕР»РЅСЏРµС‚СЃСЏ РІС‹Р·РѕРІ Event.SetEvent,
+    // РѕРґРЅР°РєРѕ Р»СѓС‡С€Рµ РїРµСЂРµСЃС‚СЂР°С…РѕРІР°С‚СЊСЃСЏ Рё РЅРµ РґРµР»Р°С‚СЊ РѕР¶РёРґР°РЅРёРµ Р±РµСЃРєРѕРЅРµС‡РЅС‹Рј
     Event.WaitFor(2000);
 
-    // Проверяем свойство Count без критической секции (это безопасно)
+    // РџСЂРѕРІРµСЂСЏРµРј СЃРІРѕР№СЃС‚РІРѕ Count Р±РµР· РєСЂРёС‚РёС‡РµСЃРєРѕР№ СЃРµРєС†РёРё (СЌС‚Рѕ Р±РµР·РѕРїР°СЃРЅРѕ)
     if LogStrings.Count > 0 then
     begin
       TmpList := TStringList.Create;
       try
-        // 1. Входим в критическую секцию
+        // 1. Р’С…РѕРґРёРј РІ РєСЂРёС‚РёС‡РµСЃРєСѓСЋ СЃРµРєС†РёСЋ
         CritSect.Enter;
         try
-          // 2. Копируем все строки из LogStrings в TmpList
+          // 2. РљРѕРїРёСЂСѓРµРј РІСЃРµ СЃС‚СЂРѕРєРё РёР· LogStrings РІ TmpList
           TmpList.Assign(LogStrings);
-          // 3. Очищаем список LogStrings
+          // 3. РћС‡РёС‰Р°РµРј СЃРїРёСЃРѕРє LogStrings
           LogStrings.Clear;
         finally
-          // 4. Выходим из критической секции
+          // 4. Р’С‹С…РѕРґРёРј РёР· РєСЂРёС‚РёС‡РµСЃРєРѕР№ СЃРµРєС†РёРё
           CritSect.Leave;
         end;
 
-        // Список TmpList является локальным, поэтому его не нужно защищать
-        // критической секцией.
+        // РЎРїРёСЃРѕРє TmpList СЏРІР»СЏРµС‚СЃСЏ Р»РѕРєР°Р»СЊРЅС‹Рј, РїРѕСЌС‚РѕРјСѓ РµРіРѕ РЅРµ РЅСѓР¶РЅРѕ Р·Р°С‰РёС‰Р°С‚СЊ
+        // РєСЂРёС‚РёС‡РµСЃРєРѕР№ СЃРµРєС†РёРµР№.
 
-        // 5. За одно действие записываем все строки из списка TmpList в лог-файл
+        // 5. Р—Р° РѕРґРЅРѕ РґРµР№СЃС‚РІРёРµ Р·Р°РїРёСЃС‹РІР°РµРј РІСЃРµ СЃС‚СЂРѕРєРё РёР· СЃРїРёСЃРєР° TmpList РІ Р»РѕРі-С„Р°Р№Р»
         WriteStringToTextFile(FLogFileName, Trim(TmpList.Text));
       finally
         TmpList.Free;
