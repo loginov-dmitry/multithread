@@ -1,21 +1,30 @@
-﻿unit Ex3Unit;
+﻿{$IFDEF FPC}{$CODEPAGE UTF8}{$H+}{$MODE DELPHI}{$ENDIF}
+unit Ex3Unit;
 
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, ProgressViewer;
+  {$IFnDEF FPC}
+    Windows, Messages, ProgressViewer, 
+  {$ELSE}
+    LCLIntf, LCLType, LMessages, 
+  {$ENDIF}
+    SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, StdCtrls;
 
 type
   TMyShortThread = class(TThread)
   private
+    FStatus: string;
     procedure DoUsefullTask; // Процедура для имитации полезной работы
+    procedure UpdateGui;
+    procedure SetThreadStatus(AStatus: string);
   public
     procedure Execute; override;
   end;
 
   TForm1 = class(TForm)
     btnRunParallelThread: TButton;
+    labStatus: TLabel;
     procedure btnRunParallelThreadClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
   private
@@ -30,7 +39,11 @@ var
 
 implementation
 
-{$R *.dfm}
+{$IFnDEF FPC}
+  {$R *.dfm}
+{$ELSE}
+  {$R *.lfm}
+{$ENDIF}
 
 procedure TForm1.btnRunParallelThreadClick(Sender: TObject);
 begin
@@ -43,6 +56,7 @@ end;
 
 { TMyShortThread }
 
+{$IFnDEF FPC}
 procedure TMyShortThread.DoUsefullTask;
 var
  AProgress: TProgressViewer;
@@ -54,10 +68,31 @@ begin
   Sleep(5000);
   AProgress.TerminateProgress;
 end;
+{$ELSE FPC}
+// Вариант метода DoUsefullTask для Лазаруса (модуль ProgressViewer для Лазаруса отсутствует)
+procedure TMyShortThread.DoUsefullTask;
+begin
+  SetThreadStatus('Выполняется поток TMyShortThread...');
+  Sleep(5000);
+  SetThreadStatus('');
+end;
+{$ENDIF FPC}
 
 procedure TMyShortThread.Execute;
 begin
   DoUsefullTask;
+end;
+
+procedure TMyShortThread.SetThreadStatus(AStatus: string);
+begin
+  FStatus := AStatus;
+  UpdateGui;
+end;
+
+procedure TMyShortThread.UpdateGui;
+begin
+  Form1.labStatus.Visible := FStatus <> '';
+  Form1.labStatus.Caption := FStatus;
 end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
