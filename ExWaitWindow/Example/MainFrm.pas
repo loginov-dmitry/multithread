@@ -44,7 +44,7 @@ uses
   LCLIntf, LCLType, LMessages,
 {$ENDIF}
   SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, ExtCtrls, StdCtrls, LDSWaitFrm, TimeIntervals, ParamsUtils;
+  Dialogs, ExtCtrls, StdCtrls, LDSWaitFrm, LDSWaitIntf, TimeIntervals, ParamsUtils;
 
 type
   TMainForm = class(TForm)
@@ -147,7 +147,7 @@ begin
       Result := True;
     end, NOT_SHOW_STOP_BTN);
   {$ELSE}
-  DoOperationInThread(Self, OPERATION_TYPE_NONE, 'Быстрая операция', ParamsEmpty, @FastOperation, NOT_SHOW_STOP_BTN);
+  DoOperationInThread(Self, OPERATION_TYPE_NONE, 'Быстрая операция', ParamsEmpty, FastOperation, NOT_SHOW_STOP_BTN);
   {$ENDIF}
   ShowMessageFmt('Время выполнения операции: %d мс', [ti.ElapsedMilliseconds]);
 end;
@@ -172,7 +172,7 @@ procedure TMainForm.Button3Click(Sender: TObject);
 begin
   DoOperationInThread(Self, OPERATION_TYPE_NONE, 'Длительные вычисления',
     TParamsRec.Build(['Min', 300, 'Max', 700]),
-    @ProgressOperation, NEED_SHOW_STOP_BTN);
+    ProgressOperation, NEED_SHOW_STOP_BTN);
 end;
 
 procedure TMainForm.FormCreate(Sender: TObject);
@@ -200,12 +200,12 @@ begin
   Summa := 51.23;
   PayType := 'ByCard';
   if DoOperationInThread(Self, OPERATION_TYPE_NONE, 'Операция с банковской картой',
-    TParamsRec.Build(['Summa', Summa]), @BankOperation, NEED_SHOW_STOP_BTN, @ResParams) then
+    TParamsRec.Build(['Summa', Summa]), BankOperation, NEED_SHOW_STOP_BTN, @ResParams) then
   begin
     CardNum := ResParams.S('CardNum');
     par.SetParams(['TovarName', TovarName, 'Summa', Summa, 'PayType', PayType, 'CardNum', CardNum, 'OperTime', ResParams.DT('OperTime')]);
     //par.SetParamsFromVariant(VarArrayOf(['TovarName', TovarName, 'Summa', Summa, 'PayType', PayType, 'CardNum', CardNum, 'OperTime', ResParams.DT('OperTime')]));
-    DoOperationInThread(Self, OPERATION_TYPE_NONE, 'Сохранение транзакции в БД', par, @SaveTransactionInDB,  NOT_SHOW_STOP_BTN);
+    DoOperationInThread(Self, OPERATION_TYPE_NONE, 'Сохранение транзакции в БД', par, SaveTransactionInDB,  NOT_SHOW_STOP_BTN);
     DoOperationInThread(Self, OPERATION_TYPE_NONE, 'Печать чека ККМ', par, PrintKKMCheck, NOT_SHOW_STOP_BTN);
   end;
 end;

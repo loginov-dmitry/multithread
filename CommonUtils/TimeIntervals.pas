@@ -130,7 +130,7 @@ implementation
 
 {$IfDef LINUX}
 const
-  TicksPerMillisecond = 10*1000;
+  TicksPerMillisecond = 1000000;
   TicksPerSecond = TicksPerMillisecond * 1000;
 {$EndIf}
 
@@ -158,7 +158,7 @@ var
   res: timespec;
 begin
   clock_gettime(CLOCK_MONOTONIC, @res);
-  Result:=((TicksPerSecond*res.tv_sec)+res.tv_nsec) div 100;
+  Result:=((TicksPerSecond*res.tv_sec)+res.tv_nsec);
 end;
 {$EndIf}
 

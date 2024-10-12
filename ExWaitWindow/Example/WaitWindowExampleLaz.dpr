@@ -10,9 +10,7 @@ uses
 
   Forms,
   MainFrm in 'MainFrm.pas' {MainForm},
-  TimeIntervals,
-  ParamsUtils,
-  LDSWaitFrm in '..\LDSWaitFrm.pas' {LDSWaitForm};
+  LDSWaitFrm in '..\LDSWaitFrm.pas', LDSWaitIntf, TimeIntervals {LDSWaitForm};
 
 {$R *.res}
 
