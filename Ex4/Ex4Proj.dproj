@@ -17,6 +17,10 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <Version>7.0</Version>
     <DCC_Define>DEBUG</DCC_Define>
+    <DCC_UnitSearchPath>..\CommonUtils;..\ExWaitWindow</DCC_UnitSearchPath>
+    <DCC_ResourcePath>..\CommonUtils;..\ExWaitWindow</DCC_ResourcePath>
+    <DCC_ObjPath>..\CommonUtils;..\ExWaitWindow</DCC_ObjPath>
+    <DCC_IncludePath>..\CommonUtils;..\ExWaitWindow</DCC_IncludePath>
   </PropertyGroup>
   <ProjectExtensions>
     <Borland.Personality>Delphi.Personality</Borland.Personality>

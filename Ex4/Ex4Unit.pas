@@ -1,10 +1,16 @@
-﻿unit Ex4Unit;
+﻿{$IFDEF FPC}{$CODEPAGE UTF8}{$H+}{$MODE DELPHI}{$ENDIF}
+unit Ex4Unit;
 
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, ProgressViewer;
+  {$IFnDEF FPC}
+    Windows, Messages,
+  {$ELSE}
+    LCLIntf, LCLType, LMessages, 
+  {$ENDIF}
+    SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, StdCtrls, LDSWaitFrm, 
+    LDSWaitIntf, ParamsUtils;
 
 type
   TMyLongThread = class(TThread)
@@ -24,10 +30,13 @@ type
     cbTerminateMode: TComboBox;
     procedure btnRunParallelThreadsClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
     { Private declarations }
     MyThread1: TMyLongThread; // Поток для первой задачи
     MyThread2: TMyLongThread; // Поток для второй задачи
+
+    function StopThreads(OperType: Integer; AParams: TParamsRec; AResParams: PParamsRec; wsi: IWaitStatusInterface): Boolean;
   public
     { Public declarations }
   end;
@@ -37,7 +46,11 @@ var
 
 implementation
 
-{$R *.dfm}
+{$IFnDEF FPC}
+  {$R *.dfm}
+{$ELSE}
+  {$R *.lfm}
+{$ENDIF}
 
 procedure TForm1.btnRunParallelThreadsClick(Sender: TObject);
 begin
@@ -100,24 +113,39 @@ begin
   end;
 end;
 
-procedure TForm1.FormDestroy(Sender: TObject);
-var
-  AProgress: TProgressViewer;
+procedure TForm1.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
+  DoOperationInThread(Self, cbTerminateMode.ItemIndex, 'Выход из программы...', ParamsEmpty, StopThreads, NOT_SHOW_STOP_BTN);
+end;
+
+procedure TForm1.FormDestroy(Sender: TObject);
+//var
+//  AProgress: TProgressViewer;
+begin
+
+  {Пример использования TProgressViewer для визуализации.
+   Визуализация была переделана на вызов функции StopThreads через функцию DoOperationInThread
+   для совместимости в Лазарусом
   AProgress := TProgressViewer.Create('Выход из программы');
   try
-    if cbTerminateMode.ItemIndex = 1 then
-    begin // Выбран режим "Одновременно (быстрее)"
-      if Assigned(MyThread1) then
-        MyThread1.Terminate; // Выставляем флаг Terminated
-      if Assigned(MyThread2) then
-        MyThread2.Terminate; // Выставляем флаг Terminated
-    end;
-    MyThread1.Free;
-    MyThread2.Free;
+    StopThreads(cbTerminateMode.ItemIndex);
   finally
     AProgress.TerminateProgress;
-  end;  
+  end;}
+
+end;
+
+function TForm1.StopThreads(OperType: Integer; AParams: TParamsRec; AResParams: PParamsRec; wsi: IWaitStatusInterface): Boolean;
+begin
+  if OperType = 1 then
+  begin // Выбран режим "Одновременно (быстрее)"
+    if Assigned(MyThread1) then
+      MyThread1.Terminate; // Выставляем флаг Terminated
+    if Assigned(MyThread2) then
+      MyThread2.Terminate; // Выставляем флаг Terminated
+  end;
+  MyThread1.Free;
+  MyThread2.Free;
 end;
 
 end.
