@@ -1,10 +1,16 @@
-﻿unit Ex6Unit;
+﻿{$IFDEF FPC}{$CODEPAGE UTF8}{$H+}{$MODE DELPHI}{$ENDIF}
+unit Ex6Unit;
 
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, ProgressViewer, MTUtils, TimeIntervals;
+  {$IFnDEF FPC}
+    Windows, Messages, 
+  {$ELSE}
+    LCLIntf, LCLType, LMessages, 
+  {$ENDIF}
+    SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, StdCtrls, MTUtils, TimeIntervals, 
+    LDSWaitFrm, LDSWaitIntf, ParamsUtils;
 
 type
   TMyThread = class(TThread)
@@ -20,8 +26,10 @@ type
     btnRunInParallelThread: TButton;
     procedure btnRunInParallelThreadClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
     { Private declarations }
+    function StopThreads(OperType: Integer; AParams: TParamsRec; AResParams: PParamsRec; wsi: IWaitStatusInterface): Boolean;
   public
     { Public declarations }
   end;
@@ -32,7 +40,11 @@ var
   StopThreadsFlag: Boolean;
 implementation
 
-{$R *.dfm}
+{$IFnDEF FPC}
+  {$R *.dfm}
+{$ELSE}
+  {$R *.lfm}
+{$ENDIF}
 
 procedure TForm1.btnRunInParallelThreadClick(Sender: TObject);
 begin
@@ -40,13 +52,21 @@ begin
   TMyThread.Create;
 end;
 
-procedure TForm1.FormDestroy(Sender: TObject);
-var
-  pv: TProgressViewer;
+procedure TForm1.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   // Выставляем флаг StopThreadsFlag, чтобы все потоки завершились
   StopThreadsFlag := True;
-  
+  if ThreadCount > 0 then
+    DoOperationInThread(Self, OPERATION_TYPE_NONE, 'Ожидаем завершение потоков...', ParamsEmpty, StopThreads, NOT_SHOW_STOP_BTN);
+end;
+
+procedure TForm1.FormDestroy(Sender: TObject);
+{var
+  pv: TProgressViewer;}
+begin
+  {// Выставляем флаг StopThreadsFlag, чтобы все потоки завершились
+  StopThreadsFlag := True;
+
   // Задерживаем выход из программы, пока не будут завершены все потоки
   if ThreadCount > 0 then
   begin
@@ -54,7 +74,15 @@ begin
     while ThreadCount > 0 do
       Sleep(10);
     pv.TerminateProgress;
-  end;
+  end;}
+end;
+
+function TForm1.StopThreads(OperType: Integer; AParams: TParamsRec;
+  AResParams: PParamsRec; wsi: IWaitStatusInterface): Boolean;
+begin
+  // Задерживаем выход из программы, пока не будут завершены все потоки
+  while ThreadCount > 0 do
+    Sleep(10);
 end;
 
 { TMyThread }

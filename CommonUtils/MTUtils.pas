@@ -31,7 +31,7 @@ interface
 
 uses
   {$IFDEF MSWINDOWS}Windows, {$ENDIF}
-  {$IFDEF FPC}LCLIntf, LCLType,{$ENDIF} 
+  {$IFDEF FPC}LCLIntf, LCLType, LConvEncoding,{$ENDIF}
   SysUtils, Classes, Contnrs, SyncObjs, DateUtils, StrUtils, 
   Math, TimeIntervals;
 
@@ -58,6 +58,7 @@ implementation
 
 procedure ThreadShowMessage(Msg: string);
 begin
+  {$IFDEF FPC}Msg := UTF8ToCP1251(Msg);{$ENDIF}
   Windows.MessageBox(0, PChar(Msg), '', MB_OK);
 end;
 
