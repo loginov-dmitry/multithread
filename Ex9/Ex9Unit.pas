@@ -1,10 +1,15 @@
-﻿unit Ex9Unit;
+﻿{$IFDEF FPC}{$CODEPAGE UTF8}{$H+}{$MODE DELPHI}{$ENDIF}
+unit Ex9Unit;
 
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, MTUtils, ComCtrls;
+  {$IFnDEF FPC}
+    Windows, Messages, 
+  {$ELSE}
+    LCLIntf, LCLType, LMessages, {$IFDEF MSWINDOWS}Windows, Messages,{$ENDIF}
+  {$ENDIF}
+    SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, StdCtrls, MTUtils, ComCtrls;
 
 const
   UM_PROGRESS_INIT   = WM_USER + 1;
@@ -41,8 +46,8 @@ type
   private
     { Private declarations }
     FMyThread: TMyThread;
-    procedure UMProgressInit(var Msg: TMessage); message UM_PROGRESS_INIT;
-    procedure UMProgressChange(var Msg: TMessage); message UM_PROGRESS_CHANGE;
+    procedure UMProgressInit(var Msg: {$IFnDEF FPC}TMessage{$ELSE}TLMessage{$ENDIF}); message UM_PROGRESS_INIT;
+    procedure UMProgressChange(var Msg: {$IFnDEF FPC}TMessage{$ELSE}TLMessage{$ENDIF}); message UM_PROGRESS_CHANGE;
   public
     { Public declarations }
   end;
@@ -51,7 +56,11 @@ var
   Form1: TForm1;
 implementation
 
-{$R *.dfm}
+{$IFnDEF FPC}
+  {$R *.dfm}
+{$ELSE}
+  {$R *.lfm}
+{$ENDIF}
 
 procedure TForm1.btnRunInParallelThreadClick(Sender: TObject);
 begin
@@ -68,7 +77,7 @@ begin
   FMyThread.Free;
 end;
 
-procedure TForm1.UMProgressChange(var Msg: TMessage);
+procedure TForm1.UMProgressChange(var Msg: {$IFnDEF FPC}TMessage{$ELSE}TLMessage{$ENDIF});
 var
   ProgressData: TProgressData;
 begin
@@ -78,7 +87,7 @@ begin
   labThreadStateInfo.Caption := ProgressData.ThreadStateInfo;
 end;
 
-procedure TForm1.UMProgressInit(var Msg: TMessage);
+procedure TForm1.UMProgressInit(var Msg: {$IFnDEF FPC}TMessage{$ELSE}TLMessage{$ENDIF});
 var
   MaxValue: Integer;
 begin
@@ -110,6 +119,11 @@ procedure TMyThread.Execute;
 var
   CurrVal: Integer;
 begin
+  {$IFDEF LINUX}
+   Внимание! Пример не будет работать корректно, т.к. в Линуксе вызовы SendMessage,
+   отправленные из параллельного потока будут обработаны в этом же потоке, а не в
+   главном потоке!
+  {$ENDIF}
   // Выставляем параметры компонента ProgressBar1
   SendMessage(FFormHandle, UM_PROGRESS_INIT, FMaxValue, 0);
   ThreadWaitTimeout(Self, 1000); // Просто пауза 1 сек.
