@@ -1,10 +1,16 @@
-﻿unit Ex5Unit;
+﻿{$IFDEF FPC}{$CODEPAGE UTF8}{$H+}{$MODE DELPHI}{$ENDIF}
+unit Ex5Unit;
 
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, ProgressViewer, Contnrs, MTUtils;
+  {$IFnDEF FPC}
+    Windows, Messages, 
+  {$ELSE}
+    LCLIntf, LCLType, LMessages, 
+  {$ENDIF}
+    SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, StdCtrls, Contnrs, MTUtils, 
+    LDSWaitFrm, LDSWaitIntf, ParamsUtils;
 
 type
   TMyLongThread1 = class(TThread)
@@ -40,9 +46,12 @@ type
     procedure btnRunParallelThreadsClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormCreate(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
     { Private declarations }
     FList: TObjectList; // Потоки для первой и второй задачи
+
+    function StopThreads(OperType: Integer; AParams: TParamsRec; AResParams: PParamsRec; wsi: IWaitStatusInterface): Boolean;
   public
     { Public declarations }
   end;
@@ -52,7 +61,11 @@ var
 
 implementation
 
-{$R *.dfm}
+{$IFnDEF FPC}
+  {$R *.dfm}
+{$ELSE}
+  {$R *.lfm}
+{$ENDIF}
 
 procedure TForm1.btnRunParallelThreadsClick(Sender: TObject);
 begin
@@ -84,16 +97,25 @@ begin
   Sleep(5000); // Оставлено для демонстрации режима "Одновременно"  
 end;
 
+procedure TForm1.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  DoOperationInThread(Self, cbTerminateMode.ItemIndex, 'Выход из программы...', ParamsEmpty, StopThreads, NOT_SHOW_STOP_BTN);
+end;
+
 procedure TForm1.FormCreate(Sender: TObject);
 begin
   FList := TObjectList.Create;
 end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
+{
 var
   AProgress: TProgressViewer;
-  I: Integer;
+  I: Integer;}
 begin
+  {Пример использования TProgressViewer для визуализации.
+   Визуализация была переделана на вызов функции StopThreads через функцию DoOperationInThread
+   для совместимости в Лазарусом
   AProgress := TProgressViewer.Create('Выход из программы');
   try
     if cbTerminateMode.ItemIndex = 1 then
@@ -107,7 +129,23 @@ begin
     FList.Free;
   finally
     AProgress.TerminateProgress;
-  end;  
+  end;}
+end;
+
+function TForm1.StopThreads(OperType: Integer; AParams: TParamsRec;
+  AResParams: PParamsRec; wsi: IWaitStatusInterface): Boolean;
+var
+  I: Integer;
+begin
+  if OperType = 1 then
+  begin // Выбран режим "Одновременно (быстрее)"
+    // Выставляем флаг Terminated для всех потоков. Можно использовать
+    // родительский класс TThread для операции приведения типов.
+    for I := 0 to FList.Count - 1 do
+      TThread(FList[I]).Terminate;
+  end;
+  // При уничтожении списка TObjectList будут уничтожены все объекты потоков
+  FList.Free;
 end;
 
 { TMyLongThread2 }

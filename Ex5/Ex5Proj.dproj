@@ -1,4 +1,5 @@
-﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <ProjectGuid>{5a439af1-90ce-4391-8632-091e44023bf2}</ProjectGuid>
     <MainSource>Ex5Proj.dpr</MainSource>
@@ -30,8 +31,13 @@
       <MainSource>MainSource</MainSource>
     </DelphiCompile>
     <DCCReference Include="..\CommonUtils\MTUtils.pas" />
+    <DCCReference Include="..\CommonUtils\ParamsUtils.pas" />
     <DCCReference Include="..\CommonUtils\ProgressViewer.pas" />
     <DCCReference Include="..\CommonUtils\TimeIntervals.pas" />
+    <DCCReference Include="..\ExWaitWindow\LDSWaitFrm.pas">
+      <Form>LDSWaitForm</Form>
+    </DCCReference>
+    <DCCReference Include="..\ExWaitWindow\LDSWaitIntf.pas" />
     <DCCReference Include="Ex5Unit.pas">
       <Form>Form1</Form>
     </DCCReference>
