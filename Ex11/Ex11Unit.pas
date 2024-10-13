@@ -1,10 +1,16 @@
-﻿unit Ex11Unit;
+﻿{$IFDEF FPC}{$CODEPAGE UTF8}{$H+}{$MODE DELPHI}{$ENDIF}
+unit Ex11Unit;
 
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, MTUtils, ComCtrls, ExtCtrls, StrUtils, Contnrs;
+  {$IFnDEF FPC}
+    Windows, Messages, 
+  {$ELSE}
+    LCLIntf, LCLType, LMessages, 
+  {$ENDIF}
+    SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, StdCtrls, MTUtils, ComCtrls, 
+    ExtCtrls, StrUtils, Contnrs;
 
 type
   TLogMessage = class
@@ -45,7 +51,11 @@ var
   EventList: TThreadList;
 implementation
 
-{$R *.dfm}
+{$IFnDEF FPC}
+  {$R *.dfm}
+{$ELSE}
+  {$R *.lfm}
+{$ENDIF}
 
 procedure TForm1.btnRunInParallelThreadClick(Sender: TObject);
 begin

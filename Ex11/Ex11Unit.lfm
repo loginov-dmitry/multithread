@@ -1,0 +1,49 @@
+object Form1: TForm1
+  Left = 0
+  Height = 390
+  Top = 0
+  Width = 775
+  Caption = 'Form1'
+  ClientHeight = 390
+  ClientWidth = 775
+  Color = clBtnFace
+  Font.Color = clWindowText
+  Font.Height = -13
+  Font.Name = 'Tahoma'
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  Position = poScreenCenter
+  object btnRunInParallelThread: TButton
+    Left = 8
+    Height = 33
+    Top = 8
+    Width = 217
+    Caption = 'Запустить доп. поток'
+    TabOrder = 0
+    OnClick = btnRunInParallelThreadClick
+  end
+  object Button1: TButton
+    Left = 248
+    Height = 33
+    Top = 8
+    Width = 177
+    Caption = 'Остановить потоки'
+    TabOrder = 1
+    OnClick = Button1Click
+  end
+  object ListBox1: TListBox
+    Left = 8
+    Height = 326
+    Top = 56
+    Width = 759
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    ItemHeight = 0
+    TabOrder = 2
+  end
+  object Timer1: TTimer
+    Interval = 100
+    OnTimer = Timer1Timer
+    Left = 416
+    Top = 72
+  end
+end
