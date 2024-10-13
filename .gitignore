@@ -40,3 +40,5 @@ __history
 /ExExceptions/lib
 /ExSync/ExEvent/SimpleLogger/lib
 /ExSync/ExEvent/SimpleLogger/backup
+/ExSync/ExEvent/FastStopThread/backup
+/ExSync/ExEvent/FastStopThread/lib

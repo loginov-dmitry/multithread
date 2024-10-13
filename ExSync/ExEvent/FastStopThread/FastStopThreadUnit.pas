@@ -1,10 +1,16 @@
-﻿unit FastStopThreadUnit;
+﻿{$IFDEF FPC}{$CODEPAGE UTF8}{$H+}{$MODE DELPHI}{$ENDIF}
+unit FastStopThreadUnit;
 
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, SyncObjs, StdCtrls, TimeIntervals, ProgressViewer, ExtCtrls;
+  {$IFnDEF FPC}
+    Windows, Messages, ProgressViewer, 
+  {$ELSE}
+    LCLIntf, LCLType, LMessages, 
+  {$ENDIF}
+    SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, SyncObjs, StdCtrls, TimeIntervals, 
+    ExtCtrls;
 
 type
   TMyThread = class(TThread)
@@ -12,7 +18,10 @@ type
     Event: TEvent;
     FUseProgressViewer: Boolean;
     FUseFullCalls: Integer;
+    FGuiMsg: string;
     procedure DoUsefullWork;
+    procedure ShowMsg(Msg: string);
+    procedure UpdateGui;
   protected
     procedure Execute; override;
   public
@@ -35,6 +44,7 @@ type
     labUseFullCalls: TLabel;
     Label4: TLabel;
     labResumeThreadAfterSetEvent: TLabel;
+    labMsgFromThread: TLabel;
     procedure btnRunThreadClick(Sender: TObject);
     procedure btnStopThreadClick(Sender: TObject);
     procedure btnWakeUpClick(Sender: TObject);
@@ -53,7 +63,11 @@ var
 
 implementation
 
-{$R *.dfm}
+{$IFnDEF FPC}
+  {$R *.dfm}
+{$ELSE}
+  {$R *.lfm}
+{$ENDIF}
 
 { TMyThread }
 
@@ -88,29 +102,54 @@ end;
 procedure TMyThread.Execute;
 var
   WaitRes: TWaitResult;
+  {$IFnDEF FPC}
   pv: TProgressViewer;
+  {$ENDIF}
 begin
+  {$IFnDEF FPC}
   pv := nil; // Чтобы компилятор не выдавал Warning
+  {$ENDIF}
+  
   while not Terminated do
   begin
+    ShowMsg('Ожидание события...');
+
     // Внимание! Визуализация ожидания события вносит значительные накладные
     // расходы и значительно увеличивает время уничтожения потока!
+    {$IFnDEF FPC}
     if FUseProgressViewer then
       pv := TProgressViewer.Create('Ожидание события');
+    {$ENDIF}
 
     WaitRes := Event.WaitFor(5 * 1000); // Ожидание события - 5 секунд
 
     if WaitRes = wrSignaled then
       tiSignalled.Stop; // Останавливаем измерение времени
 
+    ShowMsg('');
+
+    {$IFnDEF FPC}
     if FUseProgressViewer then
       pv.TerminateProgress;
+    {$ENDIF}  
 
     // Выполняем полезную работу если окончился таймаут ожидания (wrTimeout),
     // либо если произошёл вызов метода WakeUp
     if (WaitRes = wrTimeout) or ((WaitRes = wrSignaled) and (not Terminated)) then
       DoUsefullWork;
   end;
+end;
+
+procedure TMyThread.ShowMsg(Msg: string);
+begin
+  FGuiMsg := Msg;
+  TThread.Synchronize(nil, UpdateGui);
+end;
+
+procedure TMyThread.UpdateGui;
+begin
+  Form2.labMsgFromThread.Visible := FGuiMsg <> '';
+  Form2.labMsgFromThread.Caption := FGuiMsg;
 end;
 
 procedure TMyThread.WakeUp;
