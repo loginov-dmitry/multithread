@@ -38,3 +38,5 @@ __history
 /ExNotUseThreads/lib
 /ExExceptions/backup
 /ExExceptions/lib
+/ExSync/ExEvent/SimpleLogger/lib
+/ExSync/ExEvent/SimpleLogger/backup

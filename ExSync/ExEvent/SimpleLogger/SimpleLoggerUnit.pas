@@ -1,10 +1,13 @@
+п»ї{$IFDEF FPC}{$CODEPAGE UTF8}{$H+}{$MODE DELPHI}{$ENDIF}
 unit SimpleLoggerUnit;
 
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, SyncObjs, MTUtils, TimeIntervals, MTLogger;
+  {$IFDEF MSWINDOWS}Windows, Messages,{$ENDIF}
+  {$IFDEF FPC}LCLIntf, LCLType, LMessages,{$ENDIF}
+    SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, StdCtrls, SyncObjs, MTUtils, 
+    TimeIntervals, MTLogger;
 
 type
   TDemoLoggerForm = class(TForm)
@@ -30,7 +33,11 @@ var
 
 implementation
 
-{$R *.dfm}
+{$IFnDEF FPC}
+  {$R *.dfm}
+{$ELSE}
+  {$R *.lfm}
+{$ENDIF}
 
 procedure TDemoLoggerForm.Button1Click(Sender: TObject);
 var
@@ -41,10 +48,10 @@ begin
   AFileName := ExtractFilePath(Application.ExeName) + 'EventsNoThread.log';
   ti.Start;
   for I := 1 to StrToInt(Edit1.Text) do
-    WriteStringToTextFile(AFileName, Format('%s [P:%d T:%d] - Событие №%d',
+    WriteStringToTextFile(AFileName, Format('%s [P:%d T:%d] - РЎРѕР±С‹С‚РёРµ в„–%d',
       [FormatDateTime('dd.mm.yyyy hh:nn:ss.zzz', Now), GetCurrentProcessId, GetCurrentThreadId, I]));
 
-  ShowMessageFmt('Время добавления событий в лог-файл: %d мс', [ti.ElapsedMilliseconds]);
+  ShowMessageFmt('Р’СЂРµРјСЏ РґРѕР±Р°РІР»РµРЅРёСЏ СЃРѕР±С‹С‚РёР№ РІ Р»РѕРі-С„Р°Р№Р»: %d РјСЃ', [ti.ElapsedMilliseconds]);
 end;
 
 procedure TDemoLoggerForm.Button2Click(Sender: TObject);
@@ -54,16 +61,16 @@ var
 begin
   ti.Start;
   for I := 1 to StrToInt(Edit1.Text) do
-    DefLogger.AddToLog(Format('Событие №%d', [I]));
+    DefLogger.AddToLog(Format('РЎРѕР±С‹С‚РёРµ в„–%d', [I]));
   if cbCloseApp.Checked then
     Close
   else
-    ShowMessageFmt('Время добавления событий в лог-файл: %d мс', [ti.ElapsedMilliseconds]);
+    ShowMessageFmt('Р’СЂРµРјСЏ РґРѕР±Р°РІР»РµРЅРёСЏ СЃРѕР±С‹С‚РёР№ РІ Р»РѕРі-С„Р°Р№Р»: %d РјСЃ', [ti.ElapsedMilliseconds]);
 end;
 
 procedure TDemoLoggerForm.FormCreate(Sender: TObject);
 begin
-  AllowMessageBoxIfError := True; // Только в демонстрационных целях!!!
+  AllowMessageBoxIfError := True; // РўРѕР»СЊРєРѕ РІ РґРµРјРѕРЅСЃС‚СЂР°С†РёРѕРЅРЅС‹С… С†РµР»СЏС…!!!
   CreateDefLogger(ExtractFilePath(Application.ExeName) + 'EventsInThread.log');
 end;
 

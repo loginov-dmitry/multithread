@@ -1,0 +1,79 @@
+object DemoLoggerForm: TDemoLoggerForm
+  Left = 0
+  Height = 288
+  Top = 0
+  Width = 635
+  Caption = 'Демонстрация записи в лог через дополнительный поток'
+  ClientHeight = 288
+  ClientWidth = 635
+  Color = clBtnFace
+  Font.Color = clWindowText
+  Font.Height = -13
+  Font.Name = 'Tahoma'
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  Position = poScreenCenter
+  object Label1: TLabel
+    Left = 16
+    Height = 16
+    Top = 24
+    Width = 132
+    Caption = 'Добавить сообщений:'
+  end
+  object Label2: TLabel
+    Left = 24
+    Height = 32
+    Top = 96
+    Width = 457
+    Caption = 'Осторожно! Если Вы используете SSD, то построчная запись 10 тыс. строк в'#13#10'лог-файл может занять около минуты, в зависимости от модели SSD.'
+    Font.Color = clBlue
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    ParentFont = False
+  end
+  object Label3: TLabel
+    Left = 24
+    Height = 32
+    Top = 226
+    Width = 486
+    Caption = 'При записи в лог через доп. поток будет моментально записываться практически'#13#10'любой объём информации, даже 1 млн строк!'
+    Font.Color = clBlue
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    ParentFont = False
+  end
+  object Button1: TButton
+    Left = 16
+    Height = 25
+    Top = 67
+    Width = 425
+    Caption = 'Добавить сообщения в лог-файл без дополнительного потока'
+    TabOrder = 0
+    OnClick = Button1Click
+  end
+  object Edit1: TEdit
+    Left = 154
+    Height = 24
+    Top = 21
+    Width = 87
+    TabOrder = 1
+    Text = '10000'
+  end
+  object Button2: TButton
+    Left = 16
+    Height = 25
+    Top = 195
+    Width = 425
+    Caption = 'Добавить сообщения в лог-файл через дополнительный поток'
+    TabOrder = 2
+    OnClick = Button2Click
+  end
+  object cbCloseApp: TCheckBox
+    Left = 456
+    Height = 20
+    Top = 200
+    Width = 133
+    Caption = 'Закрыть программу'
+    TabOrder = 3
+  end
+end
