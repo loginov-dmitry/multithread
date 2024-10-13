@@ -1,0 +1,34 @@
+object ExceptionsForm: TExceptionsForm
+  Left = 0
+  Height = 327
+  Top = 0
+  Width = 664
+  Caption = 'Пример перехвата исключения в доп. потоке'
+  ClientHeight = 327
+  ClientWidth = 664
+  Color = clBtnFace
+  Font.Color = clWindowText
+  Font.Height = -16
+  Font.Name = 'Tahoma'
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  Position = poScreenCenter
+  object Button1: TButton
+    Left = 32
+    Height = 33
+    Top = 32
+    Width = 225
+    Caption = 'Запустить доп. поток'
+    TabOrder = 0
+    OnClick = Button1Click
+  end
+  object ListBox1: TListBox
+    Left = 0
+    Height = 237
+    Top = 88
+    Width = 662
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    ItemHeight = 0
+    TabOrder = 1
+  end
+end

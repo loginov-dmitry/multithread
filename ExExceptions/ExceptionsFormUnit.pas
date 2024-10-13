@@ -1,10 +1,15 @@
-﻿unit ExceptionsFormUnit;
+﻿{$IFDEF FPC}{$CODEPAGE UTF8}{$H+}{$MODE DELPHI}{$ENDIF}
+unit ExceptionsFormUnit;
 
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, MTLogger, MTUtils;
+  {$IFnDEF FPC}
+    Windows, Messages, 
+  {$ELSE}
+    LCLIntf, LCLType, LMessages, 
+  {$ENDIF}
+    SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, StdCtrls, MTLogger, MTUtils;
 
 type
   TMyThread = class(TThread)
@@ -37,7 +42,11 @@ var
 
 implementation
 
-{$R *.dfm}
+{$IFnDEF FPC}
+  {$R *.dfm}
+{$ELSE}
+  {$R *.lfm}
+{$ENDIF}
 
 { TMyThread }
 

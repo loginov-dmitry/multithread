@@ -35,7 +35,5 @@ object ExceptionsForm: TExceptionsForm
     Anchors = [akLeft, akTop, akRight, akBottom]
     ItemHeight = 19
     TabOrder = 1
-    ExplicitWidth = 633
-    ExplicitHeight = 209
   end
 end
