@@ -69,7 +69,7 @@ object Form1: TForm1
   object labPostMsgCount: TLabel
     Left = 212
     Top = 118
-    Width = 16
+    Width = 7
     Height = 16
     Caption = '0'
   end

@@ -1,10 +1,16 @@
-﻿unit Ex10Unit;
+﻿{$IFDEF FPC}{$CODEPAGE UTF8}{$H+}{$MODE DELPHI}{$ENDIF}
+unit Ex10Unit;
 
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, MTUtils, ComCtrls, ExtCtrls, StrUtils;
+  {$IFnDEF FPC}
+    Windows, Messages, 
+  {$ELSE}
+    LCLIntf, LCLType, LMessages, {$IFDEF MSWINDOWS}Windows, Messages,{$ENDIF}
+  {$ENDIF}
+    SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, StdCtrls, MTUtils, ComCtrls, 
+    ExtCtrls, StrUtils;
 
 const
   UM_PROGRESS_CHANGE = WM_USER + 2;
@@ -51,7 +57,7 @@ type
     { Private declarations }
     FMyThread: TMyThread;
     FPostMsgProcessCount: Integer;
-    procedure UMProgressChange(var Msg: TMessage); message UM_PROGRESS_CHANGE;
+    procedure UMProgressChange(var Msg: {$IFnDEF FPC}TMessage{$ELSE}TLMessage{$ENDIF}); message UM_PROGRESS_CHANGE;
   public
     { Public declarations }
   end;
@@ -61,7 +67,11 @@ var
   PostMessageCount: Integer;
 implementation
 
-{$R *.dfm}
+{$IFnDEF FPC}
+  {$R *.dfm}
+{$ELSE}
+  {$R *.lfm}
+{$ENDIF}
 
 procedure TForm1.btnRunInParallelThreadClick(Sender: TObject);
 var
@@ -96,7 +106,7 @@ begin
     labEndWork.Caption := IfThen(FMyThread.EndWork, 'ДА', 'НЕТ');
 end;
 
-procedure TForm1.UMProgressChange(var Msg: TMessage);
+procedure TForm1.UMProgressChange(var Msg: {$IFnDEF FPC}TMessage{$ELSE}TLMessage{$ENDIF});
 var
   ProgressData: TProgressData;
 begin
