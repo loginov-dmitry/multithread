@@ -1,0 +1,83 @@
+object Form1: TForm1
+  Left = 519
+  Height = 390
+  Top = 267
+  Width = 775
+  Caption = 'Form1'
+  ClientHeight = 390
+  ClientWidth = 775
+  Color = clBtnFace
+  Font.Color = clWindowText
+  Font.Height = -13
+  Font.Name = 'Tahoma'
+  Position = poScreenCenter
+  LCLVersion = '3.99.0.0'
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  object labLabLastThreadTime: TLabel
+    Left = 8
+    Height = 16
+    Top = 68
+    Width = 336
+    Caption = 'Информация о времени последнего запущенного потока'
+  end
+  object Label1: TLabel
+    Left = 8
+    Height = 16
+    Top = 47
+    Width = 226
+    Caption = 'Режим постановки вызова в очередь:'
+  end
+  object btnRunInParallelThread: TButton
+    Left = 8
+    Height = 33
+    Top = 8
+    Width = 217
+    Caption = 'Запустить доп. поток'
+    TabOrder = 0
+    OnClick = btnRunInParallelThreadClick
+  end
+  object Button1: TButton
+    Left = 248
+    Height = 33
+    Top = 8
+    Width = 177
+    Caption = 'Остановить потоки'
+    TabOrder = 1
+    OnClick = Button1Click
+  end
+  object ListBox1: TListBox
+    Left = 8
+    Height = 294
+    Top = 88
+    Width = 759
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    ItemHeight = 0
+    TabOrder = 2
+  end
+  object cbLinkThreadToQueue: TComboBox
+    Left = 240
+    Height = 24
+    Top = 44
+    Width = 281
+    ItemHeight = 16
+    ItemIndex = 0
+    Items.Strings = (
+      'Ассоциировать вызов с потоком TThread'
+      'Не ассоциировать вызов с потоком'
+    )
+    Style = csDropDownList
+    TabOrder = 3
+    Text = 'Ассоциировать вызов с потоком TThread'
+    OnSelect = cbLinkThreadToQueueSelect
+  end
+  object btnClearListBox: TButton
+    Left = 431
+    Height = 33
+    Top = 8
+    Width = 75
+    Caption = 'Очистить'
+    TabOrder = 4
+    OnClick = btnClearListBoxClick
+  end
+end

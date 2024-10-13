@@ -1,11 +1,16 @@
-﻿unit Ex12FullUnit;
+﻿{$IFDEF FPC}{$CODEPAGE UTF8}{$H+}{$MODE DELPHI}{$ENDIF}
+unit Ex12FullUnit;
 
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, MTUtils, ComCtrls, ExtCtrls, StrUtils, Contnrs,
-  Generics.Collections;
+  {$IFnDEF FPC}
+    Windows, Messages, 
+  {$ELSE}
+    LCLIntf, LCLType, LMessages, 
+  {$ENDIF}
+    SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, StdCtrls, MTUtils, ComCtrls, 
+    ExtCtrls, StrUtils, Contnrs, Generics.Collections;
 
 type
   TMyThread = class(TThread)
@@ -42,7 +47,11 @@ var
   LinkThreadToQueue: Boolean = True;
 implementation
 
-{$R *.dfm}
+{$IFnDEF FPC}
+  {$R *.dfm}
+{$ELSE}
+  {$R *.lfm}
+{$ENDIF}
 
 procedure TForm1.btnClearListBoxClick(Sender: TObject);
 begin
