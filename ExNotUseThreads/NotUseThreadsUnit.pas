@@ -1,10 +1,15 @@
+п»ї{$IFDEF FPC}{$CODEPAGE UTF8}{$H+}{$MODE DELPHI}{$ENDIF}
 unit NotUseThreadsUnit;
 
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, SplashFormUnit;
+  {$IFnDEF FPC}
+    Windows, Messages, 
+  {$ELSE}
+    LCLIntf, LCLType, LMessages, 
+  {$ENDIF}
+    SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, StdCtrls, SplashFormUnit;
 
 type
   TForm1 = class(TForm)
@@ -25,16 +30,20 @@ var
 
 implementation
 
-{$R *.dfm}
+{$IFnDEF FPC}
+  {$R *.dfm}
+{$ELSE}
+  {$R *.lfm}
+{$ENDIF}
 
 procedure TForm1.btnRun1Click(Sender: TObject);
 begin
-  btnRun1.Caption := 'Ждите...';
+  btnRun1.Caption := 'Р–РґРёС‚Рµ...';
   Screen.Cursor := crSQLWait;
   try
     Sleep(10000);
   finally
-    btnRun1.Caption := 'Выполнить';
+    btnRun1.Caption := 'Р’С‹РїРѕР»РЅРёС‚СЊ';
     Screen.Cursor := crDefault;
   end;
 end;

@@ -1,10 +1,15 @@
+п»ї{$IFDEF FPC}{$CODEPAGE UTF8}{$H+}{$MODE DELPHI}{$ENDIF}
 unit SplashFormUnit;
 
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, ExtCtrls;
+  {$IFnDEF FPC}
+    Windows, Messages, 
+  {$ELSE}
+    LCLIntf, LCLType, LMessages, 
+  {$ENDIF}
+    SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, StdCtrls, ExtCtrls;
 
 type
   TSplashForm = class(TForm)
@@ -22,7 +27,11 @@ procedure HideSplashForm;
 
 implementation
 
-{$R *.dfm}
+{$IFnDEF FPC}
+  {$R *.dfm}
+{$ELSE}
+  {$R *.lfm}
+{$ENDIF}
 
 var
   GlobalSplashForm: TSplashForm;
@@ -41,8 +50,8 @@ end;
 
 procedure TSplashForm.FormCreate(Sender: TObject);
 begin
-  BorderStyle := bsNone;          // Форма без рамки
-  Position    := poOwnerFormCenter;  // Форма отобразиться в середине формы-владельца
+  BorderStyle := bsNone;          // Р¤РѕСЂРјР° Р±РµР· СЂР°РјРєРё
+  Position    := poOwnerFormCenter;  // Р¤РѕСЂРјР° РѕС‚РѕР±СЂР°Р·РёС‚СЊСЃСЏ РІ СЃРµСЂРµРґРёРЅРµ С„РѕСЂРјС‹-РІР»Р°РґРµР»СЊС†Р°
   FormStyle   := fsStayOnTop;
 end;
 
