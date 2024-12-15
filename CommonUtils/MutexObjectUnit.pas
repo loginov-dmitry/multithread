@@ -101,7 +101,7 @@ end;
 {$IfDef UNIX}
 function TMutexObject.GetLockFileName: string;
 begin
-  Result := '/var/lock/' + FMutexName + '.lock';
+  Result := '/tmp/' + FMutexName + '.lock';
 end;
 {$ENDIF}
 
